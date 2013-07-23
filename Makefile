@@ -1,17 +1,28 @@
-APP = blamerl
+XFCE_TERMINAL_VERSION := $(shell xfce4-terminal --version 2>/dev/null)
+ifdef XFCE_TERMINAL_VERSION
+	TERMINAL = xfce4-terminal -e
+else
+	TERMINAL = screen
+endif
+
+BIN = blamerl
 LIBS = -lncurses
-MODULES = main.o game.o console.o
-TEST_RUN = xfce4-terminal -e
+SOURCES = $(wildcard *.cpp)
+OBJ = $(SOURCES:.cpp=.o)
 
-run: $(APP)
-	$(TEST_RUN) './$^'
+run: $(BIN)
+	$(TERMINAL) './$^'
 
-$(APP): $(MODULES)
-	$(CXX) -o $@ $(LIBS) $^
+$(BIN): $(OBJ)
+	$(CXX) $(LIBS) -o $@ $^
 
-game.o: game.h
-main.o: game.h console.h
-console.o: console.h
+%.o: %.cpp
+	$(CXX) -c $<
+
+deps: $(OBJ:.o=.cpp)
+	$(CXX) -MM $^ > $@
 
 clean:
-	$(RM) -rf *.o $(APP)
+	$(RM) -rf *.o $(BIN) deps
+
+include deps
