@@ -13,26 +13,21 @@ Game::Game(int w, int h)
 
 bool Game::process_control(int ch)
 {
+    int new_player_x = player_x;
+    int new_player_y = player_y;
+
 	switch(ch) {
-		case 'h': player_x--; break;
-		case 'j': player_y++; break;
-		case 'k': player_y--; break;
-		case 'l': player_x++; break;
+		case 'h': new_player_x--; break;
+		case 'j': new_player_y++; break;
+		case 'k': new_player_y--; break;
+		case 'l': new_player_x++; break;
 		case 'q': return false;
 		default: break;
 	}
-	if(player_x < 0) {
-		player_x = 0;
-	}
-	if(player_x >= map.width) {
-		player_x = map.width - 1;
-	}
-	if(player_y < 0) {
-		player_y = 0;
-	}
-	if(player_y >= map.height) {
-		player_y = map.height - 1;
-	}
+    if(map.valid(new_player_x, new_player_y) && map.get(new_player_x, new_player_y).passable) {
+        player_x = new_player_x;
+        player_y = new_player_y;
+    }
 	return true;
 }
 
