@@ -10,6 +10,10 @@ LIBS = -lncurses
 SOURCES = $(wildcard *.cpp)
 OBJ = $(SOURCES:.cpp=.o)
 
+test: test.cpp
+	$(CXX) -o $(BIN) $^
+	./$(BIN)
+
 run: deps $(BIN)
 	$(TERMINAL) './$(BIN)'
 
