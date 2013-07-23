@@ -17,7 +17,7 @@ public:
 	Map(int w, int h);
 
 	bool valid(int x, int y) const;
-	Cell & get(int x, int y);
-	const Cell & get(int x, int y) const;
+	Cell & cell(int x, int y);
+	const Cell & cell(int x, int y) const;
 };
 

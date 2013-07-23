@@ -9,13 +9,13 @@ Control::Control(int v)
 // --------------------------------------------------------------------------
 
 Game::Game(int w, int h)
-	: map(w, h),
+	: map(w, h), examining(false),
 	player_x(map.width / 2), player_y(map.height / 2)
 {
     for(int i = 0; i < 10; ++i) {
         int x = rand() % map.width;
         int y = rand() % map.height;
-        map.get(x, y) = Cell('#', false);
+        map.cell(x, y) = Cell('#', false);
     }
 }
 
@@ -24,11 +24,22 @@ bool Game::move_by(int shift_x, int shift_y)
     if(!map.valid(player_x + shift_x, player_y + shift_y)) {
         return false;
     }
-    if(!map.get(player_x + shift_x, player_y + shift_y).passable) {
+    if(!map.cell(player_x + shift_x, player_y + shift_y).passable) {
         return false;
     }
     player_x += shift_x;
     player_y += shift_y;
+    map.cell(player_x, player_y).sprite = '*';
+    return true;
+}
+
+bool Game::move_cursor_by(int shift_x, int shift_y)
+{
+    if(!map.valid(cursor_x + shift_x, cursor_y + shift_y)) {
+        return false;
+    }
+    cursor_x += shift_x;
+    cursor_y += shift_y;
     return true;
 }
 
@@ -48,10 +59,11 @@ bool Game::process_control(const Control & control)
         return true;
     }
 	switch(control.value) {
-        case Control::LEFT: move_by(-1, 0); break;
-        case Control::DOWN: move_by(0, 1); break;
-        case Control::UP: move_by(0, -1); break;
-        case Control::RIGHT: move_by(1, 0); break;
+        case Control::EXAMINE: examining = !examining; if(examining) { cursor_x = player_x; cursor_y = player_y; } break;
+        case Control::LEFT: examining ? move_cursor_by(-1, 0) : move_by(-1, 0); break;
+        case Control::DOWN: examining ? move_cursor_by(0, 1) : move_by(0, 1); break;
+        case Control::UP: examining ? move_cursor_by(0, -1) : move_by(0, -1); break;
+        case Control::RIGHT: examining ? move_cursor_by(1, 0) : move_by(1, 0); break;
         case Control::QUIT: return false;
 		default: break;
 	}
@@ -70,11 +82,11 @@ int Game::height() const
 
 Sprite & Game::sprite(int x, int y)
 {
-	return map.get(x, y).sprite;
+	return map.cell(x, y).sprite;
 }
 
 const Sprite & Game::sprite(int x, int y) const
 {
-	return map.get(x, y).sprite;
+	return map.cell(x, y).sprite;
 }
 

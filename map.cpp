@@ -10,7 +10,7 @@ bool Map::valid(int x, int y) const
 	return (x >= 0 && x < width && y >= 0 && y < height);
 }
 
-Cell & Map::get(int x, int y)
+Cell & Map::cell(int x, int y)
 {
 	static Cell empty_cell;
 	if(!valid(x, y)) {
@@ -19,7 +19,7 @@ Cell & Map::get(int x, int y)
 	return map[x + y * width];
 }
 
-const Cell & Map::get(int x, int y) const
+const Cell & Map::cell(int x, int y) const
 {
 	static Cell empty_cell;
 	if(!valid(x, y)) {

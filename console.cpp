@@ -33,6 +33,14 @@ void Console::draw_game(const Game & game)
 	}
 
 	mvaddch(game.player_y, game.player_x, '@');
+
+    if(game.examining) {
+        curs_set(1);
+        move(game.cursor_y, game.cursor_x);
+    } else {
+        curs_set(0);
+    }
+
 	refresh();
 }
 
@@ -47,6 +55,8 @@ Control Console::get_control()
         case 'J': return Control::RUN_DOWN;
         case 'K': return Control::RUN_UP;
         case 'L': return Control::RUN_RIGHT;
+
+        case 'x': return Control::EXAMINE;
         case 'q': return Control::QUIT;
         default: return Control::UNKNOWN;
     }
