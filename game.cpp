@@ -34,6 +34,20 @@ bool Game::move_by(int shift_x, int shift_y)
     return true;
 }
 
+bool Game::move_to(int target_x, int target_y)
+{
+    if(!map.valid(target_x, target_y)) {
+        return false;
+    }
+    if(!map.cell(target_x, target_y).passable) {
+        return false;
+    }
+    player_x = target_x;
+    player_y = target_y;
+    map.cell(player_x, player_y).sprite = '*';
+    return true;
+}
+
 bool Game::move_cursor_by(int shift_x, int shift_y)
 {
     if(!map.valid(cursor_x + shift_x, cursor_y + shift_y)) {
@@ -46,7 +60,7 @@ bool Game::move_cursor_by(int shift_x, int shift_y)
 
 bool Game::process_control(const Control & control)
 {
-    if(control.run) {
+    if(control.run && !examining) {
         bool running = true;
         while(running) {
             switch(control.value) {
@@ -64,7 +78,13 @@ bool Game::process_control(const Control & control)
         return true;
     }
 	switch(control.value) {
-        case Control::EXAMINE: examining = !examining; if(examining) { cursor_x = player_x; cursor_y = player_y; } break;
+        case Control::EXAMINE:
+            examining = !examining;
+            if(examining) {
+                cursor_x = player_x;
+                cursor_y = player_y;
+            }
+            break;
         case Control::LEFT: examining ? move_cursor_by(-1, 0) : move_by(-1, 0); break;
         case Control::DOWN: examining ? move_cursor_by(0, 1) : move_by(0, 1); break;
         case Control::UP: examining ? move_cursor_by(0, -1) : move_by(0, -1); break;
@@ -73,6 +93,14 @@ bool Game::process_control(const Control & control)
         case Control::DOWN_RIGHT: examining ? move_cursor_by(1, 1) : move_by(1, 1); break;
         case Control::UP_LEFT: examining ? move_cursor_by(-1, -1) : move_by(-1, -1); break;
         case Control::UP_RIGHT: examining ? move_cursor_by(1, -1) : move_by(1, -1); break;
+        case Control::TARGET:
+            if(examining) {
+                bool ok = move_to(cursor_x, cursor_y);
+                if(ok) {
+                    examining = false;
+                }
+            }
+            break;
         case Control::QUIT: return false;
 		default: break;
 	}

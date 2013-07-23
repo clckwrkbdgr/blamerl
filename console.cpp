@@ -66,6 +66,7 @@ Control Console::get_control()
         case 'U': return Control::RUN_UP_RIGHT;
 
         case 'x': return Control::EXAMINE;
+        case '.': return Control::TARGET;
         case 'q': return Control::QUIT;
         default: return Control::UNKNOWN;
     }
