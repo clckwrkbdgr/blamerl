@@ -11,8 +11,8 @@ int main(int argc, char ** argv)
 	while(true) {
 		console.draw_game(game);
 
-		int ch = console.get_control();
-		if(!game.process_control(ch)) {
+		Control control = console.get_control();
+		if(!game.process_control(control)) {
 			break;
 		}
 	}

@@ -1,5 +1,6 @@
 #pragma once
 class Game;
+class Control;
 
 class Console {
 public:
@@ -8,6 +9,6 @@ public:
 	~Console();
 
 	void draw_game(const Game & game);
-	int get_control();
+	Control get_control();
 };
 

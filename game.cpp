@@ -1,5 +1,13 @@
 #include "game.h"
 
+Control::Control(int v)
+    : value(v), run(false)
+{
+    run = (v == RUN_LEFT || v == RUN_RIGHT || v == RUN_UP || v == RUN_DOWN);
+}
+
+// --------------------------------------------------------------------------
+
 Game::Game(int w, int h)
 	: map(w, h),
 	player_x(map.width / 2), player_y(map.height / 2)
@@ -11,23 +19,42 @@ Game::Game(int w, int h)
     }
 }
 
-bool Game::process_control(int ch)
+bool Game::move_by(int shift_x, int shift_y)
 {
-    int new_player_x = player_x;
-    int new_player_y = player_y;
+    if(!map.valid(player_x + shift_x, player_y + shift_y)) {
+        return false;
+    }
+    if(!map.get(player_x + shift_x, player_y + shift_y).passable) {
+        return false;
+    }
+    player_x += shift_x;
+    player_y += shift_y;
+    return true;
+}
 
-	switch(ch) {
-		case 'h': new_player_x--; break;
-		case 'j': new_player_y++; break;
-		case 'k': new_player_y--; break;
-		case 'l': new_player_x++; break;
-		case 'q': return false;
+bool Game::process_control(const Control & control)
+{
+    if(control.run) {
+        bool running = true;
+        while(running) {
+            switch(control.value) {
+                case Control::RUN_LEFT: running = move_by(-1, 0); break;
+                case Control::RUN_DOWN: running = move_by(0, 1); break;
+                case Control::RUN_UP: running = move_by(0, -1); break;
+                case Control::RUN_RIGHT: running = move_by(1, 0); break;
+                default: running = false;
+            }
+        }
+        return true;
+    }
+	switch(control.value) {
+        case Control::LEFT: move_by(-1, 0); break;
+        case Control::DOWN: move_by(0, 1); break;
+        case Control::UP: move_by(0, -1); break;
+        case Control::RIGHT: move_by(1, 0); break;
+        case Control::QUIT: return false;
 		default: break;
 	}
-    if(map.valid(new_player_x, new_player_y) && map.get(new_player_x, new_player_y).passable) {
-        player_x = new_player_x;
-        player_y = new_player_y;
-    }
 	return true;
 }
 

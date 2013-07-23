@@ -36,8 +36,19 @@ void Console::draw_game(const Game & game)
 	refresh();
 }
 
-int Console::get_control()
+Control Console::get_control()
 {
-	return getch();
+	switch(getch()) {
+        case 'h': return Control::LEFT;
+        case 'j': return Control::DOWN;
+        case 'k': return Control::UP;
+        case 'l': return Control::RIGHT;
+        case 'H': return Control::RUN_LEFT;
+        case 'J': return Control::RUN_DOWN;
+        case 'K': return Control::RUN_UP;
+        case 'L': return Control::RUN_RIGHT;
+        case 'q': return Control::QUIT;
+        default: return Control::UNKNOWN;
+    }
 }
 
