@@ -6,7 +6,11 @@
 #include <cstdlib>
 #include <vector>
 
+template<class T>
+std::string to_string(const T & t) { std::ostringstream out; out << t; return out.str(); }
+
 class Formatter {
+	class Field;
 public:
     Formatter(const std::string & pattern)
         : i(0), result(pattern)
@@ -26,10 +30,32 @@ public:
 
     template<class T>
     Formatter & arg(const T & t) {
-        std::ostringstream out;
-        out << i++;
-        return arg(out.str(), t);
+        return arg(to_string(i++), t);
     }
+
+    template<class T>
+    std::string arg_repr(const T & t, const Field & field) {
+		std::string repr = to_string(t);
+		if(field.width > 0) {
+			std::ostringstream out;
+			out << std::setw(field.width) << repr;
+			repr = out.str();
+		}
+		return repr;
+	}
+
+    std::string arg_repr(double t, const Field & field) {
+		std::ostringstream out;
+		if(field.width > 0) {
+			out.width(field.width);
+		}
+		if(field.precision > 0) {
+			out.setf(std::ios::fixed);
+			out.precision(field.precision);
+		}
+		out << t;
+		return out.str();
+	}
 
     template<class T>
     Formatter & arg(const std::string & name, const T & t) {
@@ -38,10 +64,9 @@ public:
             field->begin += shift;
             field->end += shift;
             if(field->name == name) {
-                std::ostringstream out;
-                out << t;
+				std::string repr = arg_repr(t, *field);
                 size_t old_size = result.size();
-                result.replace(field->begin - 1, field->end + 2 - field->begin, out.str());
+                result.replace(field->begin - 1, field->end + 2 - field->begin, repr);
                 shift += result.size() - old_size;
             }
         }
@@ -50,8 +75,9 @@ public:
 private:
     struct Field {
         int begin, end;
-        std::string name, width, precision;
-        Field(int _begin = 0, int _end = 0, const std::string & field = 0) : begin(_begin), end(_end)
+        std::string name;
+		int width, precision;
+        Field(int _begin = 0, int _end = 0, const std::string & field = 0) : begin(_begin), end(_end), width(0), precision(0)
         {
             size_t colon = field.find(':');
             if(colon == std::string::npos) {
@@ -60,10 +86,10 @@ private:
                 name = field.substr(0, colon);
                 size_t dot = field.find('.', colon);
                 if(dot == std::string::npos) {
-                    width = field.substr(colon + 1);
+                    width = atoi(field.substr(colon + 1).c_str());
                 } else {
-                    width = field.substr(colon + 1, dot - colon - 1);
-                    precision = field.substr(dot + 1);
+                    width = atoi(field.substr(colon + 1, dot - colon - 1).c_str());
+                    precision = atoi(field.substr(dot + 1).c_str());
                 }
             }
             // TODO test width and precision: if present, take into consideration.
@@ -158,7 +184,7 @@ int main()
     COMPARE(format("{0}").arg(Date(17, 7, 2013)), "17/07/2013");
     COMPARE(format("{{0}").arg(1), "{0}");
     COMPARE(format("{0:10}").arg(1), "         1");
-    COMPARE(format("{0:10.2}").arg(1), "      1.00");
+    COMPARE(format("{0:10.2}").arg(1.0), "      1.00");
 
 }
 
