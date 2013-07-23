@@ -10,7 +10,7 @@ public:
 	bool process_control(int ch);
 	int width() const;
 	int height() const;
-	int & get(int x, int y);
-	const int & get(int x, int y) const;
+	Sprite & sprite(int x, int y);
+	const Sprite & sprite(int x, int y) const;
 };
 

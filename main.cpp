@@ -1,10 +1,12 @@
 #include "console.h"
 #include "game.h"
+#include <cstdlib>
 
 int main(int argc, char ** argv)
 {
+    srand(time(NULL));
 	Console console;
-	Game game(console.width, console.height);
+	Game game(80, 25);
 
 	while(true) {
 		console.draw_game(game);

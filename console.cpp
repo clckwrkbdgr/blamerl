@@ -27,11 +27,7 @@ void Console::draw_game(const Game & game)
 	getmaxyx(stdscr, height, width);
 	for(int x = 0; x < game.width(); ++x) {
 		for(int y = 0; y < game.height(); ++y) {
-			int sprite = ' ';
-			switch(game.get(x, y)) {
-				case 0: sprite = '.'; break;
-				default: sprite = ' '; break;
-			}
+			Sprite sprite = game.sprite(x, y);
 			mvaddch(y, x, sprite);
 		}
 	}
