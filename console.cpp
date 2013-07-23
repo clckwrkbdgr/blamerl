@@ -56,14 +56,14 @@ Control Console::get_control()
         case 'y': return Control::UP_LEFT;
         case 'u': return Control::UP_RIGHT;
 
-        case 'H': return Control::RUN_LEFT;
-        case 'J': return Control::RUN_DOWN;
-        case 'K': return Control::RUN_UP;
-        case 'L': return Control::RUN_RIGHT;
-        case 'B': return Control::RUN_DOWN_LEFT;
-        case 'N': return Control::RUN_DOWN_RIGHT;
-        case 'Y': return Control::RUN_UP_LEFT;
-        case 'U': return Control::RUN_UP_RIGHT;
+        case 'H': return Control(Control::LEFT, true);
+        case 'J': return Control(Control::DOWN, true);
+        case 'K': return Control(Control::UP, true);
+        case 'L': return Control(Control::RIGHT, true);
+        case 'B': return Control(Control::DOWN_LEFT, true);
+        case 'N': return Control(Control::DOWN_RIGHT, true);
+        case 'Y': return Control(Control::UP_LEFT, true);
+        case 'U': return Control(Control::UP_RIGHT, true);
 
         case 'x': return Control::EXAMINE;
         case '.': return Control::TARGET;

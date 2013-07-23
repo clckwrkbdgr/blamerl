@@ -5,15 +5,13 @@ class Control {
 public:
     enum Type { UNKNOWN,
         LEFT, RIGHT, DOWN, UP, DOWN_LEFT, DOWN_RIGHT, UP_LEFT, UP_RIGHT,
-        RUN_LEFT, RUN_RIGHT, RUN_DOWN, RUN_UP,
-        RUN_DOWN_LEFT, RUN_DOWN_RIGHT, RUN_UP_LEFT, RUN_UP_RIGHT,
         EXAMINE, TARGET,
         QUIT
     };
 
     int value;
     bool run;
-    Control(int v = UNKNOWN);
+    Control(int v = UNKNOWN, bool running = false);
 };
 
 

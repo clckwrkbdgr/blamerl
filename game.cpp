@@ -1,10 +1,10 @@
 #include "game.h"
 
-Control::Control(int v)
-    : value(v), run(false)
+Control::Control(int v, bool running)
+    : value(v), run(running)
 {
-    run = (v == RUN_LEFT || v == RUN_RIGHT || v == RUN_UP || v == RUN_DOWN ||
-            v == RUN_DOWN_LEFT || v == RUN_DOWN_RIGHT || v == RUN_UP_LEFT || v == RUN_UP_RIGHT);
+    //run = (v == RUN_LEFT || v == RUN_RIGHT || v == RUN_UP || v == RUN_DOWN ||
+            //v == RUN_DOWN_LEFT || v == RUN_DOWN_RIGHT || v == RUN_UP_LEFT || v == RUN_UP_RIGHT);
 }
 
 // --------------------------------------------------------------------------
@@ -60,23 +60,8 @@ bool Game::move_cursor_by(int shift_x, int shift_y)
 
 bool Game::process_control(const Control & control)
 {
-    if(control.run && !examining) {
-        bool running = true;
-        while(running) {
-            switch(control.value) {
-                case Control::RUN_LEFT: running = move_by(-1, 0); break;
-                case Control::RUN_DOWN: running = move_by(0, 1); break;
-                case Control::RUN_UP: running = move_by(0, -1); break;
-                case Control::RUN_RIGHT: running = move_by(1, 0); break;
-                case Control::RUN_DOWN_LEFT: running = move_by(-1, 1); break;
-                case Control::RUN_DOWN_RIGHT: running = move_by(1, 1); break;
-                case Control::RUN_UP_LEFT: running = move_by(-1, -1); break;
-                case Control::RUN_UP_RIGHT: running = move_by(1, -1); break;
-                default: running = false;
-            }
-        }
-        return true;
-    }
+    int shift_x = 0;
+    int shift_y = 0;
 	switch(control.value) {
         case Control::EXAMINE:
             examining = !examining;
@@ -85,14 +70,14 @@ bool Game::process_control(const Control & control)
                 cursor_y = player_y;
             }
             break;
-        case Control::LEFT: examining ? move_cursor_by(-1, 0) : move_by(-1, 0); break;
-        case Control::DOWN: examining ? move_cursor_by(0, 1) : move_by(0, 1); break;
-        case Control::UP: examining ? move_cursor_by(0, -1) : move_by(0, -1); break;
-        case Control::RIGHT: examining ? move_cursor_by(1, 0) : move_by(1, 0); break;
-        case Control::DOWN_LEFT: examining ? move_cursor_by(-1, 1) : move_by(-1, 1); break;
-        case Control::DOWN_RIGHT: examining ? move_cursor_by(1, 1) : move_by(1, 1); break;
-        case Control::UP_LEFT: examining ? move_cursor_by(-1, -1) : move_by(-1, -1); break;
-        case Control::UP_RIGHT: examining ? move_cursor_by(1, -1) : move_by(1, -1); break;
+        case Control::LEFT: shift_x = -1; shift_y = 0; break;
+        case Control::DOWN: shift_x = 0; shift_y = 1; break;
+        case Control::UP: shift_x = 0; shift_y = -1; break;
+        case Control::RIGHT: shift_x = 1; shift_y = 0; break;
+        case Control::DOWN_LEFT: shift_x = -1; shift_y = 1; break;
+        case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
+        case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
+        case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
         case Control::TARGET:
             if(examining) {
                 bool ok = move_to(cursor_x, cursor_y);
@@ -104,6 +89,19 @@ bool Game::process_control(const Control & control)
         case Control::QUIT: return false;
 		default: break;
 	}
+
+    if(shift_x != 0 || shift_y != 0) {
+        if(examining) {
+            move_cursor_by(shift_x, shift_y);
+        } else if(control.run) {
+            bool running = true;
+            while(running) {
+                running = move_by(shift_x, shift_y);
+            }
+        } else {
+            move_by(shift_x, shift_y);
+        }
+    }
 	return true;
 }
 
