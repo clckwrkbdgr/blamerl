@@ -3,7 +3,8 @@
 Control::Control(int v)
     : value(v), run(false)
 {
-    run = (v == RUN_LEFT || v == RUN_RIGHT || v == RUN_UP || v == RUN_DOWN);
+    run = (v == RUN_LEFT || v == RUN_RIGHT || v == RUN_UP || v == RUN_DOWN ||
+            v == RUN_DOWN_LEFT || v == RUN_DOWN_RIGHT || v == RUN_UP_LEFT || v == RUN_UP_RIGHT);
 }
 
 // --------------------------------------------------------------------------
@@ -53,6 +54,10 @@ bool Game::process_control(const Control & control)
                 case Control::RUN_DOWN: running = move_by(0, 1); break;
                 case Control::RUN_UP: running = move_by(0, -1); break;
                 case Control::RUN_RIGHT: running = move_by(1, 0); break;
+                case Control::RUN_DOWN_LEFT: running = move_by(-1, 1); break;
+                case Control::RUN_DOWN_RIGHT: running = move_by(1, 1); break;
+                case Control::RUN_UP_LEFT: running = move_by(-1, -1); break;
+                case Control::RUN_UP_RIGHT: running = move_by(1, -1); break;
                 default: running = false;
             }
         }
@@ -64,6 +69,10 @@ bool Game::process_control(const Control & control)
         case Control::DOWN: examining ? move_cursor_by(0, 1) : move_by(0, 1); break;
         case Control::UP: examining ? move_cursor_by(0, -1) : move_by(0, -1); break;
         case Control::RIGHT: examining ? move_cursor_by(1, 0) : move_by(1, 0); break;
+        case Control::DOWN_LEFT: examining ? move_cursor_by(-1, 1) : move_by(-1, 1); break;
+        case Control::DOWN_RIGHT: examining ? move_cursor_by(1, 1) : move_by(1, 1); break;
+        case Control::UP_LEFT: examining ? move_cursor_by(-1, -1) : move_by(-1, -1); break;
+        case Control::UP_RIGHT: examining ? move_cursor_by(1, -1) : move_by(1, -1); break;
         case Control::QUIT: return false;
 		default: break;
 	}
