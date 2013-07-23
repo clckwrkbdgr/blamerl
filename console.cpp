@@ -25,15 +25,18 @@ void Console::draw_game(const Game & game)
 {
 	int width, height;
 	getmaxyx(stdscr, height, width);
-	move(0, 0);
-	for(int x = 0; x < width; ++x) {
-		for(int y = 0; y < height; ++y) {
-			addch(' ');
+	for(int x = 0; x < game.width; ++x) {
+		for(int y = 0; y < game.height; ++y) {
+			int sprite = ' ';
+			switch(game.get(x, y)) {
+				case 0: sprite = '.'; break;
+				default: sprite = ' '; break;
+			}
+			mvaddch(y, x, sprite);
 		}
-		addch('\n');
 	}
 
-	mvaddch(game.y, game.x, '@');
+	mvaddch(game.player_y, game.player_x, '@');
 	refresh();
 }
 
