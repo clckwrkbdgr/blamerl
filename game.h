@@ -26,7 +26,6 @@ public:
 	bool process_control(const Control & control);
 	int width() const;
 	int height() const;
-	Sprite & sprite(int x, int y);
 	const Sprite & sprite(int x, int y) const;
 
     bool move_by(int shift_x, int shift_y);

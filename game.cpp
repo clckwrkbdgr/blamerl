@@ -14,27 +14,7 @@ Game::Game(int w, int h)
 	: map(w, h), examining(false),
 	player_x(map.width / 2), player_y(map.height / 2)
 {
-    for(int i = 0; i < 10; ++i) {
-        int x = rand() % map.width;
-        int y = rand() % map.height;
-        map.cell(x, y) = Cell('#', false);
-    }
-    for(int i = 0; i < 5; ++i) {
-        int x1 = rand() % (map.width / 2);
-        int y = rand() % map.height;
-        int x2 = map.width / 2 + rand() % (map.width / 2);
-        for(int x = x1; x <= x2; ++x) {
-            map.cell(x, y) = Cell('#', false);
-        }
-    }
-    for(int i = 0; i < 5; ++i) {
-        int x = rand() % (map.width / 2);
-        int y1 = rand() % map.height;
-        int y2 = map.height / 2 + rand() % (map.height / 2);
-        for(int y = y1; y <= y2; ++y) {
-            map.cell(x, y) = Cell('#', false);
-        }
-    }
+	map.generate();
 }
 
 bool Game::move_by(int shift_x, int shift_y)
@@ -42,12 +22,12 @@ bool Game::move_by(int shift_x, int shift_y)
     if(!map.valid(player_x + shift_x, player_y + shift_y)) {
         return false;
     }
-    if(!map.cell(player_x + shift_x, player_y + shift_y).passable) {
+    if(!map.passable(player_x + shift_x, player_y + shift_y)) {
         return false;
     }
     player_x += shift_x;
     player_y += shift_y;
-    map.cell(player_x, player_y).sprite = '*';
+    //map.cell(player_x, player_y).sprite = '*';
     return true;
 }
 
@@ -62,7 +42,7 @@ bool Game::move_to(int target_x, int target_y)
     if(!map.valid(target_x, target_y)) {
         return false;
     }
-    if(!map.cell(target_x, target_y).passable) {
+    if(!map.passable(target_x, target_y)) {
         return false;
     }
 
@@ -96,7 +76,7 @@ bool Game::move_to(int target_x, int target_y)
                 if(!map.valid(next_step->x, next_step->y)) {
                     continue;
                 }
-                if(!map.cell(next_step->x, next_step->y).passable) {
+                if(!map.passable(next_step->x, next_step->y)) {
                     continue;
                 }
                 bool exists = false;
@@ -243,13 +223,9 @@ int Game::height() const
 	return map.height;
 }
 
-Sprite & Game::sprite(int x, int y)
-{
-	return map.cell(x, y).sprite;
-}
-
 const Sprite & Game::sprite(int x, int y) const
 {
-	return map.cell(x, y).sprite;
+	return map.sprite(x, y);
 }
+
 
