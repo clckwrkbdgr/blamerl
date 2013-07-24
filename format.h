@@ -79,6 +79,7 @@ class Format;
  */
 Format format(const std::string & pattern);
 
+
 /** String conversion routine.
  * Should be defined for each class that intended to be used as argument in format() function.
  */
@@ -128,16 +129,22 @@ private:
     std::string result;
 };
 
+namespace FormatAction {
+    void no_action(const std::string & message);
+    typedef void (*Action)(const std::string &);
+}
+
 /** Class for internal usage. */
 class Format {
     struct Data {
         int refCount;
         Formatter formatter;
-        Data(const std::string & pattern);
+        FormatAction::Action action;
+        Data(const std::string & pattern, FormatAction::Action action_after);
     };
     Data * data;
 public:
-    Format(const std::string & pattern);
+    Format(const std::string & pattern, FormatAction::Action action_after = FormatAction::no_action);
     Format(const Format & other);
     Format & operator=(const Format & other);
     virtual ~Format();

@@ -103,13 +103,13 @@ std::string Formatter::Field::double_repr(double value) const
 
 //------------------------------------------------------------------------------
 
-Format::Data::Data(const std::string & pattern)
-    : refCount(1), formatter(pattern)
+Format::Data::Data(const std::string & pattern, FormatAction::Action action_after)
+    : refCount(1), formatter(pattern), action(action_after)
 {
 }
 
-Format::Format(const std::string & pattern)
-    : data(new Data(pattern))
+Format::Format(const std::string & pattern, FormatAction::Action action_after)
+    : data(new Data(pattern, action_after))
 {
 }
 
@@ -121,14 +121,22 @@ Format::Format(const Format & other)
 
 Format & Format::operator=(const Format & other)
 {
+    data->refCount--;
+    if(data->refCount <= 0) {
+        data->action(data->formatter.str());
+        delete data;
+    }
+
     data = other.data;
     data->refCount++;
+    return *this;
 }
 
 Format::~Format()
 {
     data->refCount--;
     if(data->refCount <= 0) {
+        data->action(data->formatter.str());
         delete data;
     }
 }
@@ -141,5 +149,11 @@ Format::operator std::string() const
 const std::string & Format::str() const
 {
     return data->formatter.str();
+}
+
+//------------------------------------------------------------------------------
+
+void FormatAction::no_action(const std::string & message)
+{
 }
 

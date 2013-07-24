@@ -12,11 +12,12 @@
 *.la
 *.a
 
-# Dependencies
+# Build
 deps
 
 # Vim
 *.swp
 
-# Blame
+# Runtime
 blamerl
+*.log
