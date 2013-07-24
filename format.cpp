@@ -1,4 +1,5 @@
 #include "format.h"
+#include <cstdlib>
 
 Format format(const std::string & pattern)
 {

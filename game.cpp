@@ -1,6 +1,7 @@
 #include "game.h"
 #include "log.h"
 #include <cmath>
+#include <cstdlib>
 
 Control::Control(int v, bool running)
     : value(v), run(running)
