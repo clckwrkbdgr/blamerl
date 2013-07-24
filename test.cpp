@@ -9,7 +9,7 @@
 // Usage: format(FORMAT_STRING).arg(value).arg(name, value);
 //      FIELD ::= {NAME[:SPEC]}
 //      NAME ::= [position | name]
-//      SPEC ::= [width] [.precision]
+//      SPEC ::= [FILL] [width] [.precision]
 //
 // Each field is either positional number:
 //      format("{0}, {1}").arg(1).arg(2) => "1, 2"
@@ -27,11 +27,17 @@
 //      format("{{0}").arg(1) => "{{0}"
 //
 // Field can have width and precision specificator:
-//      name[:[width][.precision]]
+//      name[:[fill][width][.precision]]
 //
 // Width defines minimum field width (any character out of that width will be truncated).
-// If actual width is lesser than specified in field, argument will be padded with spaces.
+// If actual width is lesser than specified one, argument will be padded with spaces.
 //      format("<{0:10}>, <{0:2}>").arg("123") => "<       123>, <12>"
+//
+// If specified width is greater than actual one, argument is padded to the left and filled with `fill` character.
+// It could be any character except for digits (0-9). If width is preceeded with zero, fill character will be zero.
+// By default fill character is space.
+//      format("{0:02.2}").arg(1) => "01"
+//      format("{0:_10}").arg(1) => "_________1"
 //
 // Precision defines count of digist after decimal point for floating-point numbers:
 //      format("{0:5.2}").arg(3.14158255358) => " 3.14"
@@ -44,7 +50,7 @@
 //          int day, month, year;
 //      };
 //      std::string to_string(const Date & date) {
-//          return format("{day:.2}/{month:.2}/{year:.4}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
+//          return format("{day:02}/{month:02}/{year:04}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
 //      }
 
 template<class T>
@@ -79,6 +85,7 @@ public:
 		std::string repr = to_string(t);
 		if(field.width > 0) {
 			std::ostringstream out;
+            out.fill(field.fill);
 			out << std::setw(field.width) << repr;
 			repr = out.str();
 		}
@@ -88,23 +95,12 @@ public:
     std::string arg_repr(double t, const Field & field) {
 		std::ostringstream out;
 		if(field.width > 0) {
+            out.fill(field.fill);
 			out.width(field.width);
 		}
 		if(field.precision > 0) {
 			out.setf(std::ios::fixed);
 			out.precision(field.precision);
-		}
-		out << t;
-		return out.str();
-	}
-
-    std::string arg_repr(int t, const Field & field) {
-		std::ostringstream out;
-		if(field.precision > 0) {
-            out.fill('0');
-            out.width(field.precision);
-		} else if(field.width > 0) {
-			out.width(field.width);
 		}
 		out << t;
 		return out.str();
@@ -133,8 +129,10 @@ private:
     struct Field {
         int begin, end;
         std::string name;
+        char fill;
 		int width, precision;
-        Field(int _begin = 0, int _end = 0, const std::string & field = 0) : begin(_begin), end(_end), width(0), precision(0)
+        Field(int _begin = 0, int _end = 0, const std::string & field = 0)
+            : begin(_begin), end(_end), fill(' '), width(0), precision(0)
         {
             size_t colon = field.find(':');
             if(colon == std::string::npos) {
@@ -142,11 +140,20 @@ private:
             } else {
                 name = field.substr(0, colon);
                 size_t dot = field.find('.', colon);
-                if(dot == std::string::npos) {
-                    width = atoi(field.substr(colon + 1).c_str());
-                } else {
-                    width = atoi(field.substr(colon + 1, dot - colon - 1).c_str());
+                bool is_dot = dot != std::string::npos;
+                std::string width_spec = is_dot ? field.substr(colon + 1, dot - (colon + 1)) : field.substr(colon + 1);
+                if(width_spec.size() > 1) {
+                    bool has_fill = !isdigit(width_spec[0]) || (width_spec[0] == '0' && isdigit(width_spec[1]) );
+                    if(has_fill) {
+                        fill = width_spec[0];
+                        ++colon;
+                    }
+                }
+                if(is_dot) {
+                    width = atoi(field.substr(colon + 1, dot - (colon + 1)).c_str());
                     precision = atoi(field.substr(dot + 1).c_str());
+                } else {
+                    width = atoi(field.substr(colon + 1).c_str());
                 }
             }
         }
@@ -198,7 +205,7 @@ struct Date {
 };
 std::string to_string(const Date & date)
 {
-	return format("{day:.2}/{month:.2}/{year:.4}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
+	return format("{day:02}/{month:02}/{year:04}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
 }
 
 #define COMPARE(a, b) { std::string r = (a); if(r != (b)) { \
@@ -226,10 +233,14 @@ int main()
     COMPARE(format("{{0}").arg(1), "{0}");
     COMPARE(format("{0:10}").arg(1), "         1");
     COMPARE(format("{0:10.2}").arg(1.0), "      1.00");
-    COMPARE(format("{0:10.2}").arg(1), "01");
-    COMPARE(format("{0:.10}").arg(1), "0000000001");
-    COMPARE(format("{0:.0}").arg(1), "1");
+    COMPARE(format("{0:02.2}").arg(1), "01");
+    COMPARE(format("{0:.10}").arg(1), "1");
     COMPARE(format("{0:10}").arg(1), "         1");
+    COMPARE(format("{0:02.2}").arg(1), "01");
+    COMPARE(format("{0:_10}").arg(1), "_________1");
+    COMPARE(format("{0:.0}").arg(1), "1");
+    COMPARE(format("{0:0.0}").arg(1), "1");
+    COMPARE(format("{0: 10}").arg(1), "         1");
     COMPARE(format("{1} = {value}").arg("value", 3.14).arg("Pi"), "Pi = 3.14");
 
 }
