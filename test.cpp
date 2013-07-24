@@ -44,6 +44,8 @@ public:
 		return repr;
 	}
 
+	// TODO arg repr for int and take precision as padding with zeroes.
+
     std::string arg_repr(double t, const Field & field) {
 		std::ostringstream out;
 		if(field.width > 0) {
@@ -92,7 +94,7 @@ private:
                     precision = atoi(field.substr(dot + 1).c_str());
                 }
             }
-            // TODO test width and precision: if present, take into consideration.
+			// TODO filling.
             //std::cout << field << " -> " << "name=[" << name << "] width=[" << width << "] precision=[" << precision << "]\n";
         }
     };
@@ -135,35 +137,16 @@ Format format(const std::string & pattern)
     return Format(pattern);
 }
 
-/*
-template<class T1>
-std::string format(const std::string & pattern, const T1 & t1)
-{
-    Formatter formatter(pattern);
-    formatter.arg(t1);
-    return formatter.str();
-}
-
-template<class T1, class T2>
-std::string format(const std::string & pattern, const T1 & t1, const T2 & t2)
-{
-    Formatter formatter(pattern);
-    formatter.arg(t1).arg(t2);
-    return formatter.str();
-}
-*/
-
 // ------------------------- USAGE ------------------------
 
 struct Date {
     int day, month, year;
     Date(int _day, int _month, int _year) : day(_day), month(_month), year(_year) {}
 };
-std::ostream & operator<<(std::ostream & out, const Date & value) {
-    // TODO format with width and fills and precision.
-    return out << std::setfill('0') << std::setw(2) << value.day
-        << "/" << std::setfill('0') << std::setw(2) << value.month
-        << "/" << std::setfill('0') << std::setw(4) << value.year;
+std::string to_string(const Date & date)
+{
+	// TODO fix test for padding using precision.
+	return format("{day:02}/{month:02}/{year:04}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
 }
 
 #define COMPARE(a, b) { std::string r = (a); if(r != (b)) { \
@@ -185,6 +168,11 @@ int main()
     COMPARE(format("{{0}").arg(1), "{0}");
     COMPARE(format("{0:10}").arg(1), "         1");
     COMPARE(format("{0:10.2}").arg(1.0), "      1.00");
+	// TODO fix test for padding using precision.
+	// TODO add type specifier: d or f or s.
+    COMPARE(format("{0:010}").arg(1), "0000000001");
+    COMPARE(format("{0:0}").arg(1), "1");
+    COMPARE(format("{0: 10}").arg(1), "         1");
 
 }
 
