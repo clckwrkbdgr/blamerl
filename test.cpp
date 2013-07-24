@@ -6,6 +6,47 @@
 #include <cstdlib>
 #include <vector>
 
+// Usage: format(FORMAT_STRING).arg(value).arg(name, value);
+//      FIELD ::= {NAME[:SPEC]}
+//      NAME ::= [position | name]
+//      SPEC ::= [width] [.precision]
+//
+// Each field is either positional number:
+//      format("{0}, {1}").arg(1).arg(2) => "1, 2"
+//
+// Or name of argument:
+//      format("Pi = {value}").arg("value", 3.14) => "Pi = 3.14"
+//
+// Types could be mixed (numbers for positional args is counting even for named args):
+//      format("{1} = {value}").arg("value", 3.14).arg("Pi") => "Pi = 3.14"
+//
+// Arguments could be repeated and follow in any order:
+//      format("{1} {operator} {0} = {result}").arg(2).arg(3).arg("result", 5).arg("operator", '+') => "3 + 2 = 5";
+//
+// A brace character could be inserted by doubling it:
+//      format("{{0}").arg(1) => "{{0}"
+//
+// Field can have width and precision specificator:
+//      name[:[width][.precision]]
+//
+// Width defines minimum field width (any character out of that width will be truncated).
+// If actual width is lesser than specified in field, argument will be padded with spaces.
+//      format("<{0:10}>, <{0:2}>").arg("123") => "<       123>, <12>"
+//
+// Precision defines count of digist after decimal point for floating-point numbers:
+//      format("{0:5.2}").arg(3.14158255358) => " 3.14"
+//
+// When precision is specified for integer numbers, it defines arg's width and pads with leading zeroes (actual width is ignored):
+//      format("{0:10.5}").arg(1) => "00001"
+//
+// In order to use any user-defined class a `to_string` routine should be declared for it:
+//      struct Date {
+//          int day, month, year;
+//      };
+//      std::string to_string(const Date & date) {
+//          return format("{day:.2}/{month:.2}/{year:.4}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
+//      }
+
 template<class T>
 std::string to_string(const T & t) { std::ostringstream out; out << t; return out.str(); }
 
@@ -30,7 +71,7 @@ public:
 
     template<class T>
     Formatter & arg(const T & t) {
-        return arg(to_string(i++), t);
+        return arg(to_string(i), t);
     }
 
     template<class T>
@@ -43,8 +84,6 @@ public:
 		}
 		return repr;
 	}
-
-	// TODO arg repr for int and take precision as padding with zeroes.
 
     std::string arg_repr(double t, const Field & field) {
 		std::ostringstream out;
@@ -59,6 +98,18 @@ public:
 		return out.str();
 	}
 
+    std::string arg_repr(int t, const Field & field) {
+		std::ostringstream out;
+		if(field.precision > 0) {
+            out.fill('0');
+            out.width(field.precision);
+		} else if(field.width > 0) {
+			out.width(field.width);
+		}
+		out << t;
+		return out.str();
+	}
+
     template<class T>
     Formatter & arg(const std::string & name, const T & t) {
         int shift = 0;
@@ -67,11 +118,15 @@ public:
             field->end += shift;
             if(field->name == name) {
 				std::string repr = arg_repr(t, *field);
+                if(field->width > 0 && repr.size() > field->width) {
+                    repr = repr.substr(0, field->width);
+                }
                 size_t old_size = result.size();
                 result.replace(field->begin - 1, field->end + 2 - field->begin, repr);
                 shift += result.size() - old_size;
             }
         }
+        ++i;
         return *this;
     }
 private:
@@ -94,8 +149,6 @@ private:
                     precision = atoi(field.substr(dot + 1).c_str());
                 }
             }
-			// TODO filling.
-            //std::cout << field << " -> " << "name=[" << name << "] width=[" << width << "] precision=[" << precision << "]\n";
         }
     };
     std::vector<Field> fields;
@@ -145,8 +198,7 @@ struct Date {
 };
 std::string to_string(const Date & date)
 {
-	// TODO fix test for padding using precision.
-	return format("{day:02}/{month:02}/{year:04}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
+	return format("{day:.2}/{month:.2}/{year:.4}").arg("day", date.day).arg("month", date.month).arg("year", date.year);
 }
 
 #define COMPARE(a, b) { std::string r = (a); if(r != (b)) { \
@@ -155,8 +207,14 @@ std::string to_string(const Date & date)
     std::cout << "Good: '" << r << "' == '" << b << "'." << std::endl; \
 } }
 
+
+
+
 int main()
 {
+    COMPARE(format("{0:5.2}").arg(3.14158255358), " 3.14");
+    COMPARE(format("<{0:10}>, <{0:2}>").arg("123"), "<       123>, <12>");
+    COMPARE(format("{1} {operator} {0} = {result}").arg(2).arg(3).arg("result", 5).arg("operator", '+'), "3 + 2 = 5");
     COMPARE(format("{0}").arg(1), "1");
     COMPARE(format("{0}{0}").arg(1), "11");
     COMPARE(format("Hello, {0}!").arg("world"), "Hello, world!");
@@ -168,11 +226,11 @@ int main()
     COMPARE(format("{{0}").arg(1), "{0}");
     COMPARE(format("{0:10}").arg(1), "         1");
     COMPARE(format("{0:10.2}").arg(1.0), "      1.00");
-	// TODO fix test for padding using precision.
-	// TODO add type specifier: d or f or s.
-    COMPARE(format("{0:010}").arg(1), "0000000001");
-    COMPARE(format("{0:0}").arg(1), "1");
-    COMPARE(format("{0: 10}").arg(1), "         1");
+    COMPARE(format("{0:10.2}").arg(1), "01");
+    COMPARE(format("{0:.10}").arg(1), "0000000001");
+    COMPARE(format("{0:.0}").arg(1), "1");
+    COMPARE(format("{0:10}").arg(1), "         1");
+    COMPARE(format("{1} = {value}").arg("value", 3.14).arg("Pi"), "Pi = 3.14");
 
 }
 
