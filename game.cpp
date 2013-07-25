@@ -163,6 +163,7 @@ bool Game::move_cursor_by(int shift_x, int shift_y)
     }
     cursor_x += shift_x;
     cursor_y += shift_y;
+	message = format("You see {0}.").arg(map.name(cursor_x, cursor_y));
     return true;
 }
 
@@ -173,6 +174,7 @@ bool Game::show_cursor() const
 
 bool Game::process_moving(const Control & control)
 {
+	message = "";
 	int shift_x = 0;
 	int shift_y = 0;
 	switch(control.value) {
@@ -180,6 +182,7 @@ bool Game::process_moving(const Control & control)
 			state = EXAMINING;
 			cursor_x = player_x;
 			cursor_y = player_y;
+			message = "You see yourself.";
 			break;
 		case Control::LEFT: shift_x = -1; shift_y = 0; break;
 		case Control::DOWN: shift_x = 0; shift_y = 1; break;

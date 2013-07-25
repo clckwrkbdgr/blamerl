@@ -1,18 +1,21 @@
 #pragma once
 #include <vector>
+#include <string>
 
 typedef int Sprite;
 
 struct Cell {
     Sprite sprite;
     bool passable;
-    Cell(const Sprite & _sprite = ' ', bool _passable = false) : sprite(_sprite), passable(_passable) {}
+	std::string name;
+    Cell(const Sprite & _sprite = ' ', bool _passable = false, const std::string & cell_name = std::string());
 };
 
 struct Door {
 	int x, y;
 	bool opened;
 	Sprite sprite;
+	std::string name;
 	Door(int _x, int _y);
 	void open();
 	void close();
@@ -29,6 +32,7 @@ public:
 	bool valid(int x, int y) const;
 	bool passable(int x, int y) const;
 	const Sprite & sprite(int x, int y) const;
+	const std::string & name(int x, int y) const;
 
 	void open_at(int x, int y);
 	void close_at(int x, int y);

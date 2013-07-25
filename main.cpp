@@ -7,7 +7,7 @@ int main(int argc, char ** argv)
 {
     srand(time(NULL));
 	Console console;
-	Game game(80, 24);
+	Game game(80, 23);
     log("Game started.");
 
 	while(true) {

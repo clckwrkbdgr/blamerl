@@ -22,6 +22,7 @@ public:
     bool examining;
     int cursor_x, cursor_y;
 	int player_x, player_y;
+	std::string message;
 
 	Game(int w, int h);
 	bool process_control(const Control & control);
