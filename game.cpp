@@ -27,7 +27,6 @@ bool Game::move_by(int shift_x, int shift_y)
     }
     player_x += shift_x;
     player_y += shift_y;
-    //map.cell(player_x, player_y).sprite = '*';
     return true;
 }
 
