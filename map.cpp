@@ -50,6 +50,27 @@ const Sprite & Map::sprite(int x, int y) const
 	return cell(x, y).sprite;
 }
 
+void Map::open_at(int x, int y)
+{
+	for(std::vector<Door>::iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			if(!door->opened) {
+				door->open();
+			}
+		}
+	}
+}
+
+void Map::close_at(int x, int y)
+{
+	for(std::vector<Door>::iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			if(door->opened) {
+				door->close();
+			}
+		}
+	}
+}
 
 Cell & Map::cell(int x, int y)
 {

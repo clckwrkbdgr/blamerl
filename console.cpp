@@ -35,7 +35,7 @@ void Console::draw_game(const Game & game)
 
 	mvaddch(game.player_y, game.player_x, '@');
 
-    if(game.examining) {
+    if(game.show_cursor()) {
         curs_set(1);
         move(game.cursor_y, game.cursor_x);
     } else {

@@ -166,57 +166,144 @@ bool Game::move_cursor_by(int shift_x, int shift_y)
     return true;
 }
 
-bool Game::process_control(const Control & control)
+bool Game::show_cursor() const
 {
-    int shift_x = 0;
-    int shift_y = 0;
+	return (state == EXAMINING);
+}
+
+bool Game::process_moving(const Control & control)
+{
+	int shift_x = 0;
+	int shift_y = 0;
 	switch(control.value) {
-		case Control::CANCEL:
-			if(examining) {
-				examining = false;
-			}
+		case Control::EXAMINE:
+			state = EXAMINING;
+			cursor_x = player_x;
+			cursor_y = player_y;
 			break;
-        case Control::EXAMINE:
-            examining = !examining;
-            if(examining) {
-                cursor_x = player_x;
-                cursor_y = player_y;
-            }
-            break;
-        case Control::LEFT: shift_x = -1; shift_y = 0; break;
-        case Control::DOWN: shift_x = 0; shift_y = 1; break;
-        case Control::UP: shift_x = 0; shift_y = -1; break;
-        case Control::RIGHT: shift_x = 1; shift_y = 0; break;
-        case Control::DOWN_LEFT: shift_x = -1; shift_y = 1; break;
-        case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
-        case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
-        case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
-        case Control::OPEN: state = OPENING; break;
-        case Control::CLOSE: state = CLOSING; break;
-        case Control::TARGET:
-            if(examining) {
-                bool ok = move_to(cursor_x, cursor_y);
-                if(ok) {
-                    examining = false;
-                }
-            }
-            break;
-        case Control::QUIT: return false;
+		case Control::LEFT: shift_x = -1; shift_y = 0; break;
+		case Control::DOWN: shift_x = 0; shift_y = 1; break;
+		case Control::UP: shift_x = 0; shift_y = -1; break;
+		case Control::RIGHT: shift_x = 1; shift_y = 0; break;
+		case Control::DOWN_LEFT: shift_x = -1; shift_y = 1; break;
+		case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
+		case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
+		case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
+		case Control::OPEN: state = OPENING; break;
+		case Control::CLOSE: state = CLOSING; break;
+		case Control::QUIT: return false;
 		default: break;
 	}
 
-    if(shift_x != 0 || shift_y != 0) {
-        if(examining) {
-            move_cursor_by(shift_x, shift_y);
-        } else if(control.run) {
-            bool running = true;
-            while(running) {
-                running = move_by(shift_x, shift_y);
-            }
-        } else {
-            move_by(shift_x, shift_y);
-        }
-    }
+	if(shift_x != 0 || shift_y != 0) {
+		if(control.run) {
+			bool running = true;
+			while(running) {
+				running = move_by(shift_x, shift_y);
+			}
+		} else {
+			move_by(shift_x, shift_y);
+		}
+	}
+	return true;
+}
+
+bool Game::process_examining(const Control & control)
+{
+	int shift_x = 0;
+	int shift_y = 0;
+	switch(control.value) {
+		case Control::CANCEL:
+			state = MOVING;
+			break;
+		case Control::EXAMINE:
+			state = MOVING;
+			break;
+		case Control::LEFT: shift_x = -1; shift_y = 0; break;
+		case Control::DOWN: shift_x = 0; shift_y = 1; break;
+		case Control::UP: shift_x = 0; shift_y = -1; break;
+		case Control::RIGHT: shift_x = 1; shift_y = 0; break;
+		case Control::DOWN_LEFT: shift_x = -1; shift_y = 1; break;
+		case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
+		case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
+		case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
+		case Control::TARGET: {
+			bool ok = move_to(cursor_x, cursor_y);
+			if(ok) {
+				state = MOVING;
+			}
+			break;
+		}
+		default: break;
+	}
+
+	if(shift_x != 0 || shift_y != 0) {
+		move_cursor_by(shift_x, shift_y);
+	}
+	return true;
+}
+
+bool Game::process_opening(const Control & control)
+{
+	int shift_x = 0;
+	int shift_y = 0;
+	switch(control.value) {
+		case Control::CANCEL:
+			state = MOVING;
+			break;
+		case Control::LEFT: shift_x = -1; shift_y = 0; break;
+		case Control::DOWN: shift_x = 0; shift_y = 1; break;
+		case Control::UP: shift_x = 0; shift_y = -1; break;
+		case Control::RIGHT: shift_x = 1; shift_y = 0; break;
+		case Control::DOWN_LEFT: shift_x = -1; shift_y = 1; break;
+		case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
+		case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
+		case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
+		default: break;
+	}
+
+	if(shift_x != 0 || shift_y != 0) {
+		map.open_at(player_x + shift_x, player_y + shift_y);
+	}
+	state = MOVING;
+	return true;
+}
+
+bool Game::process_closing(const Control & control)
+{
+	int shift_x = 0;
+	int shift_y = 0;
+	switch(control.value) {
+		case Control::CANCEL:
+			state = MOVING;
+			break;
+		case Control::LEFT: shift_x = -1; shift_y = 0; break;
+		case Control::DOWN: shift_x = 0; shift_y = 1; break;
+		case Control::UP: shift_x = 0; shift_y = -1; break;
+		case Control::RIGHT: shift_x = 1; shift_y = 0; break;
+		case Control::DOWN_LEFT: shift_x = -1; shift_y = 1; break;
+		case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
+		case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
+		case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
+		default: break;
+	}
+
+	if(shift_x != 0 || shift_y != 0) {
+		map.close_at(player_x + shift_x, player_y + shift_y);
+	}
+	state = MOVING;
+	return true;
+}
+
+bool Game::process_control(const Control & control)
+{
+	switch(state) {
+		case MOVING: return process_moving(control);
+		case EXAMINING: return process_examining(control);
+		case OPENING: return process_opening(control);
+		case CLOSING: return process_closing(control);
+		default: return true;
+	}
 	return true;
 }
 

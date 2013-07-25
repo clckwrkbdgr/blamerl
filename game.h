@@ -17,7 +17,7 @@ public:
 
 class Game {
 public:
-	enum State { MOVING, OPENING, CLOSING } state;
+	enum State { MOVING, EXAMINING, OPENING, CLOSING } state;
 	Map map;
     bool examining;
     int cursor_x, cursor_y;
@@ -28,9 +28,15 @@ public:
 	int width() const;
 	int height() const;
 	const Sprite & sprite(int x, int y) const;
+	bool show_cursor() const;
 
     bool move_by(int shift_x, int shift_y);
     bool move_cursor_by(int shift_x, int shift_y);
     bool move_to(int target_x, int target_y);
+
+	bool process_moving(const Control & control);
+	bool process_examining(const Control & control);
+	bool process_opening(const Control & control);
+	bool process_closing(const Control & control);
 };
 
