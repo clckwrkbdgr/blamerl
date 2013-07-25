@@ -1,6 +1,7 @@
 #include "console.h"
 #include <ncurses.h>
 #include "game.h"
+#include "log.h"
 
 Console::Console()
 {
@@ -47,6 +48,20 @@ void Console::draw_game(const Game & game)
 Control Console::get_control()
 {
 	switch(getch()) {
+		case 27: {
+			log("Read 27");
+			timeout(0);
+			int code = getch();
+			notimeout(stdscr, TRUE);
+			log("Read {0}").arg(code);
+			if(code == ERR || code == 27) {
+				log("It was an ERR and I got an ESC.");
+				return Control::CANCEL; // Escape;
+			} else {
+				// Have an ALT+code here.
+			}
+			break;
+		}
         case 'h': return Control::LEFT;
         case 'j': return Control::DOWN;
         case 'k': return Control::UP;
@@ -64,6 +79,9 @@ Control Console::get_control()
         case 'N': return Control(Control::DOWN_RIGHT, true);
         case 'Y': return Control(Control::UP_LEFT, true);
         case 'U': return Control(Control::UP_RIGHT, true);
+
+        case 'o': return Control::OPEN;
+        case 'c': return Control::CLOSE;
 
         case 'x': return Control::EXAMINE;
         case '.': return Control::TARGET;

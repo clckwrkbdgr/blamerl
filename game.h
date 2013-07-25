@@ -3,9 +3,9 @@
 
 class Control {
 public:
-    enum Type { UNKNOWN,
+    enum Type { UNKNOWN, CANCEL,
         LEFT, RIGHT, DOWN, UP, DOWN_LEFT, DOWN_RIGHT, UP_LEFT, UP_RIGHT,
-        EXAMINE, TARGET,
+        EXAMINE, TARGET, OPEN, CLOSE, 
         QUIT
     };
 
@@ -17,6 +17,7 @@ public:
 
 class Game {
 public:
+	enum State { MOVING, OPENING, CLOSING } state;
 	Map map;
     bool examining;
     int cursor_x, cursor_y;

@@ -11,7 +11,7 @@ Control::Control(int v, bool running)
 // --------------------------------------------------------------------------
 
 Game::Game(int w, int h)
-	: map(w, h), examining(false),
+	: state(MOVING), map(w, h), examining(false),
 	player_x(map.width / 2), player_y(map.height / 2)
 {
 	map.generate();
@@ -171,6 +171,11 @@ bool Game::process_control(const Control & control)
     int shift_x = 0;
     int shift_y = 0;
 	switch(control.value) {
+		case Control::CANCEL:
+			if(examining) {
+				examining = false;
+			}
+			break;
         case Control::EXAMINE:
             examining = !examining;
             if(examining) {
@@ -186,6 +191,8 @@ bool Game::process_control(const Control & control)
         case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
         case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
         case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
+        case Control::OPEN: state = OPENING; break;
+        case Control::CLOSE: state = CLOSING; break;
         case Control::TARGET:
             if(examining) {
                 bool ok = move_to(cursor_x, cursor_y);
