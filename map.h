@@ -24,37 +24,16 @@ struct Cell {
 	static int register_type(const CellType & cell_type);
 };
 
-struct Door {
-	int x, y;
-	bool opened;
-	Sprite sprite;
-	std::string name;
-	Door(int _x, int _y);
-	void open();
-	void close();
-};
-
 class Map {
 public:
 	int width, height;
 	std::vector<Cell> map;
-	std::vector<Door> doors;
 
 	Map();
 	Map(int w, int h);
 
 	bool valid(int x, int y) const;
-	bool passable(int x, int y) const;
-	const Sprite & sprite(int x, int y) const;
-	const std::string & name(int x, int y) const;
 
-	void open_at(int x, int y);
-	void close_at(int x, int y);
-
-	void generate();
-
-	void update_cell_type(int x, int y, int new_type);
-private:
 	Cell & cell(int x, int y);
 	const Cell & cell(int x, int y) const;
 };

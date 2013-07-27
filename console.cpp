@@ -33,7 +33,7 @@ void Console::draw_game(const Game & game)
 		}
 	}
 
-	mvaddch(game.player_y, game.player_x, '@');
+	mvaddch(game.player.y, game.player.x, '@');
 
 	mvprintw(height - 1, 0, "%s", std::string(width, ' ').c_str());
 	mvprintw(height - 1, 0, "%s", game.message.c_str());

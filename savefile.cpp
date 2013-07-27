@@ -11,7 +11,7 @@ bool save(const Game & game, const std::string & filename)
 		log("Cannot open {0} for writing!").arg(filename);
 		return false;
 	}
-	out << game.player_x << ' ' << game.player_y << '\n';
+	out << game.player.x << ' ' << game.player.y << '\n';
 
 	out << Cell::types().size() << '\n';
 	for(std::vector<CellType>::const_iterator cell_type = Cell::types().begin(); cell_type != Cell::types().end(); ++cell_type) {
@@ -26,8 +26,8 @@ bool save(const Game & game, const std::string & filename)
 		out << '\n';
 	}
 
-	out << game.map.doors.size() << '\n';
-	for(std::vector<Door>::const_iterator door = game.map.doors.begin(); door != game.map.doors.end(); ++door) {
+	out << game.doors.size() << '\n';
+	for(std::vector<Door>::const_iterator door = game.doors.begin(); door != game.doors.end(); ++door) {
 		out << door->x << ' ' << door->y << ' ' << (door->opened ? 1 : 0) << ' ' << int(door->sprite) << ' ' << door->name << '\n';
 	}
 
@@ -44,7 +44,7 @@ bool load(Game & game, const std::string & filename)
 		return false;
 	}
 	game = Game();
-	in >> game.player_x >> game.player_y;
+	in >> game.player.x >> game.player.y;
 
 	Cell::types().clear();
 	int cell_types_count = 0;
@@ -69,7 +69,7 @@ bool load(Game & game, const std::string & filename)
 		}
 	}
 
-	game.map.doors.clear();
+	game.doors.clear();
 	int door_count = 0;
 	in >> door_count;
 	while(door_count--) {
@@ -83,7 +83,7 @@ bool load(Game & game, const std::string & filename)
 		door.opened = opened == 1;
 		door.sprite = sprite;
 		door.name = name;
-		game.map.doors.push_back(door);
+		game.doors.push_back(door);
 	}
 
 	log("Game is successfully loaded.");
