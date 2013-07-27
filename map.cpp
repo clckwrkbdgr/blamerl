@@ -175,3 +175,10 @@ void Map::generate()
 		doors.push_back(Door(x, door_y));
     }
 }
+
+void Map::update_cell_type(int x, int y, int new_type)
+{
+	if(valid(x, y)) {
+		cell(x, y).type = new_type;
+	}
+}

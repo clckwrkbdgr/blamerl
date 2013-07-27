@@ -51,6 +51,8 @@ public:
 	void close_at(int x, int y);
 
 	void generate();
+
+	void update_cell_type(int x, int y, int new_type);
 private:
 	Cell default_cell;
 	Cell & cell(int x, int y);
