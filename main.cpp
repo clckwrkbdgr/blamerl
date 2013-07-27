@@ -3,13 +3,16 @@
 #include "log.h"
 #include "savefile.h"
 #include <cstdlib>
+#include <cstdio>
 
 int main(int argc, char ** argv)
 {
     srand(time(NULL));
 	Console console;
 	Game game;
-	if(!load(game, "blamerl.save")) {
+	if(load(game, "blamerl.save")) {
+		remove("blamerl.save");
+	} else {
 		game.generate();
 	}
     log("Game started.");
@@ -23,7 +26,9 @@ int main(int argc, char ** argv)
 		}
 	}
 
-	save(game, "blamerl.save");
+	if(game.do_save) {
+		save(game, "blamerl.save");
+	}
 	log("Exiting...");
 
 	return 0;

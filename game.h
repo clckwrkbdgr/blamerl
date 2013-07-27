@@ -5,7 +5,7 @@ class Control {
 public:
     enum Type { UNKNOWN, CANCEL,
         LEFT, RIGHT, DOWN, UP, DOWN_LEFT, DOWN_RIGHT, UP_LEFT, UP_RIGHT,
-        EXAMINE, TARGET, OPEN, CLOSE, 
+        EXAMINE, TARGET, OPEN, CLOSE, SUICIDE,
         QUIT
     };
 
@@ -17,8 +17,9 @@ public:
 
 class Game {
 public:
-	enum State { MOVING, EXAMINING, OPENING, CLOSING } state;
+	enum State { MOVING, EXAMINING, OPENING, CLOSING, SUICIDING } state;
 	Map map;
+	bool do_save;
     bool examining;
     int cursor_x, cursor_y;
 	int player_x, player_y;
@@ -41,5 +42,6 @@ public:
 	bool process_examining(const Control & control);
 	bool process_opening(const Control & control);
 	bool process_closing(const Control & control);
+	bool process_suicide(const Control & control);
 };
 

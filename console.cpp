@@ -89,6 +89,7 @@ Control Console::get_control()
         case 'x': return Control::EXAMINE;
         case '.': return Control::TARGET;
         case 'q': return Control::QUIT;
+        case 'Q': return Control::SUICIDE;
         default: return Control::UNKNOWN;
     }
 }

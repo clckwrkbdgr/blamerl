@@ -12,7 +12,7 @@ Control::Control(int v, bool running)
 // --------------------------------------------------------------------------
 
 Game::Game()
-	: state(MOVING), examining(false), player_x(0), player_y(0)
+	: state(MOVING), do_save(true), examining(false), player_x(0), player_y(0)
 {
 }
 
@@ -104,8 +104,14 @@ bool Game::process_moving(const Control & control)
 		case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
 		case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
 		case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
-		case Control::OPEN: state = OPENING; break;
-		case Control::CLOSE: state = CLOSING; break;
+		case Control::OPEN: state = OPENING; return true;
+		case Control::CLOSE: state = CLOSING; return true;
+		case Control::SUICIDE:
+		{
+			state = SUICIDING;
+			message = "Are you really want to commit suicide? (Y/N)";
+			return true;
+		}
 		case Control::QUIT: return false;
 		default: break;
 	}
@@ -120,6 +126,27 @@ bool Game::process_moving(const Control & control)
 			move_by(shift_x, shift_y);
 		}
 	}
+	return true;
+}
+
+bool Game::process_suicide(const Control & control)
+{
+	int shift_x = 0;
+	int shift_y = 0;
+	log("Suicide: {0}").arg(do_save);
+	log("Control is UP_LEFT: {0}").arg(control.value == Control::UP_LEFT);
+	switch(control.value) {
+		case Control::CANCEL:
+			state = MOVING;
+			message = "Well okay then.";
+			break;
+		case Control::UP_LEFT: do_save = false; return false;
+		default: break;
+	}
+	log("Suicide: {0}").arg(do_save);
+
+	state = MOVING;
+	message = "Well okay then.";
 	return true;
 }
 
@@ -215,6 +242,7 @@ bool Game::process_control(const Control & control)
 		case EXAMINING: return process_examining(control);
 		case OPENING: return process_opening(control);
 		case CLOSING: return process_closing(control);
+		case SUICIDING: return process_suicide(control);
 		default: return true;
 	}
 	return true;
