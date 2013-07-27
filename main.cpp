@@ -8,7 +8,10 @@ int main(int argc, char ** argv)
 {
     srand(time(NULL));
 	Console console;
-	Game game(80, 23);
+	Game game;
+	if(!load(game, "blamerl.save")) {
+		game.generate();
+	}
     log("Game started.");
 
 	while(true) {

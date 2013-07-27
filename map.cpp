@@ -60,10 +60,16 @@ void Door::close()
 
 //------------------------------------------------------------------------------
 
+static Cell default_cell = Cell::register_type(CellType(' ', false, "void"));
+
+Map::Map()
+	: width(0), height(0)
+{
+}
+
 Map::Map(int w, int h)
 	: width(w), height(h),
-	map(width * height, Cell::register_type(CellType('.', true, "floor"))),
-	default_cell(Cell::register_type(CellType(' ', false, "void")))
+	map(width * height, Cell::register_type(CellType('.', true, "floor")))
 {
 }
 

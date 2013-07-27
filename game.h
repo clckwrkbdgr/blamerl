@@ -24,7 +24,9 @@ public:
 	int player_x, player_y;
 	std::string message;
 
-	Game(int w, int h);
+	Game();
+	void generate();
+
 	bool process_control(const Control & control);
 	int width() const;
 	int height() const;

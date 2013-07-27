@@ -40,6 +40,7 @@ public:
 	std::vector<Cell> map;
 	std::vector<Door> doors;
 
+	Map();
 	Map(int w, int h);
 
 	bool valid(int x, int y) const;
@@ -54,7 +55,6 @@ public:
 
 	void update_cell_type(int x, int y, int new_type);
 private:
-	Cell default_cell;
 	Cell & cell(int x, int y);
 	const Cell & cell(int x, int y) const;
 };

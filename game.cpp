@@ -11,11 +11,17 @@ Control::Control(int v, bool running)
 
 // --------------------------------------------------------------------------
 
-Game::Game(int w, int h)
-	: state(MOVING), map(w, h), examining(false),
-	player_x(map.width / 2), player_y(map.height / 2)
+Game::Game()
+	: state(MOVING), examining(false), player_x(0), player_y(0)
 {
+}
+
+void Game::generate()
+{
+	map = Map(80, 23);
 	map.generate();
+	player_x = map.width / 2;
+	player_y = map.height / 2;
 }
 
 bool Game::move_by(int shift_x, int shift_y)
