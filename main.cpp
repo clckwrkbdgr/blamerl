@@ -1,6 +1,7 @@
 #include "console.h"
 #include "game.h"
 #include "log.h"
+#include "savefile.h"
 #include <cstdlib>
 
 int main(int argc, char ** argv)
@@ -18,6 +19,9 @@ int main(int argc, char ** argv)
 			break;
 		}
 	}
+
+	save(game, "blamerl.save");
+	log("Exiting...");
 
 	return 0;
 }

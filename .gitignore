@@ -20,4 +20,5 @@ deps
 
 # Runtime
 blamerl
+*.save
 *.log
