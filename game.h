@@ -60,6 +60,8 @@ public:
     bool move_cursor_by(int shift_x, int shift_y);
     bool move_to(int target_x, int target_y);
 
+	void invalidate_fov();
+
 	bool process_moving(const Control & control);
 	bool process_examining(const Control & control);
 	bool process_opening(const Control & control);

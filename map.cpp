@@ -7,7 +7,7 @@ CellType::CellType(const Sprite & _sprite, bool _passable, const std::string & c
 }
 
 Cell::Cell(int cell_type)
-	: type(cell_type)
+	: type(cell_type), visible(false), seen(false)
 {
 }
 

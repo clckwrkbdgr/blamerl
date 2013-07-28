@@ -82,6 +82,7 @@ void Game::generate()
 
 	player.x = map.width / 2;
 	player.y = map.height / 2;
+	invalidate_fov();
 }
 
 bool Game::move_by(int shift_x, int shift_y)
@@ -96,6 +97,7 @@ bool Game::move_by(int shift_x, int shift_y)
     player.y += shift_y;
 	static int STEP = Cell::register_type(CellType('*', true, "your step"));
 	map.cell(player.x, player.y) = STEP;
+	invalidate_fov();
     return true;
 }
 
@@ -264,6 +266,7 @@ bool Game::process_opening(const Control & control)
 
 	if(shift_x != 0 || shift_y != 0) {
 		open_at(player.x + shift_x, player.y + shift_y);
+		invalidate_fov();
 	}
 	state = MOVING;
 	return true;
@@ -290,6 +293,7 @@ bool Game::process_closing(const Control & control)
 
 	if(shift_x != 0 || shift_y != 0) {
 		close_at(player.x + shift_x, player.y + shift_y);
+		invalidate_fov();
 	}
 	state = MOVING;
 	return true;
@@ -318,53 +322,64 @@ int Game::height() const
 	return map.height;
 }
 
-const Sprite & Game::sprite(int x, int y) const
+void Game::invalidate_fov()
 {
-	static Sprite CANNOT_SEE = ' ';
-	int dx = std::abs(x - player.x);
-	int dy = std::abs(y - player.y);
-	int distance = int(std::sqrt(dx * dx + dy * dy));
-	bool can_see = distance <= player.sight;
-	if(can_see) {
-		int deltax = x - player.x;
-		int deltay = y - player.y;
-		double error = 0.0;
-		int iy = deltay > 0 ? 1 : -1;
-		int ix = deltax > 0 ? 1 : -1;
-		if(dx > dy) {
-			double delta_error = std::abs(double(deltay) / double(deltax));
-			int cy = player.y;
-			for(int cx = player.x; cx != x; cx += ix) {
-				if(!passable(cx, cy)) {
-					can_see = false;
-					break;
-				}
+	for(int x = player.x - player.sight; x <= player.x + player.sight; ++x) {
+		for(int y = player.y - player.sight; y <= player.y + player.sight; ++y) {
+			int dx = std::abs(x - player.x);
+			int dy = std::abs(y - player.y);
+			int distance = int(std::sqrt(dx * dx + dy * dy));
+			bool can_see = distance <= player.sight;
+			if(can_see) {
+				int deltax = x - player.x;
+				int deltay = y - player.y;
+				double error = 0.0;
+				int iy = deltay > 0 ? 1 : -1;
+				int ix = deltax > 0 ? 1 : -1;
+				if(dx > dy) {
+					double delta_error = std::abs(double(deltay) / double(deltax));
+					int cy = player.y;
+					for(int cx = player.x; cx != x; cx += ix) {
+						if(!passable(cx, cy)) {
+							can_see = false;
+							break;
+						}
 
-				error += delta_error;
-				if(error > 0.5) {
-					cy += iy;
-					error -= 1.0;
+						error += delta_error;
+						if(error > 0.5) {
+							cy += iy;
+							error -= 1.0;
+						}
+					}
+				} else {
+					double delta_error = std::abs(double(deltax) / double(deltay));
+					int cx = player.x;
+					for(int cy = player.y; cy != y; cy += iy) {
+						if(!passable(cx, cy)) {
+							can_see = false;
+							break;
+						}
+
+						error += delta_error;
+						if(error > 0.5) {
+							cx += ix;
+							error -= 1.0;
+						}
+					}
 				}
 			}
-		} else {
-			double delta_error = std::abs(double(deltax) / double(deltay));
-			int cx = player.x;
-			for(int cy = player.y; cy != y; cy += iy) {
-				if(!passable(cx, cy)) {
-					can_see = false;
-					break;
-				}
-
-				error += delta_error;
-				if(error > 0.5) {
-					cx += ix;
-					error -= 1.0;
-				}
+			map.cell(x, y).visible = can_see;
+			if(can_see) {
+				map.cell(x, y).seen = true;
 			}
 		}
 	}
+}
 
-	if(!can_see) {
+const Sprite & Game::sprite(int x, int y) const
+{
+	if(!map.cell(x, y).visible && !map.cell(x, y).seen) {
+		static Sprite CANNOT_SEE = ' ';
 		return CANNOT_SEE;
 	}
 	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {

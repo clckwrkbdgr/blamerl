@@ -14,6 +14,8 @@ struct CellType {
 
 struct Cell {
 	int type;
+	bool visible;
+	bool seen;
 
 	Cell(int cell_type);
 	const Sprite & sprite() const;

@@ -3,7 +3,7 @@
 #include "log.h"
 #include <fstream>
 
-enum { VERSION = 1 };
+enum { VERSION = 2 };
 
 bool save(const Game & game, const std::string & filename)
 {
@@ -25,7 +25,8 @@ bool save(const Game & game, const std::string & filename)
 	out << game.map.width << ' ' << game.map.height << '\n';
 	for(int y = 0; y < game.map.height; ++y) {
 		for(int x = 0; x < game.map.width; ++x) {
-			out << game.map.map[x + y * game.map.width].type << ' ';
+			const Cell & cell = game.map.cell(x, y);
+			out << cell.type << ' ' << (cell.seen ? 1 : 0) << ' ';
 		}
 		out << '\n';
 	}
@@ -80,6 +81,12 @@ bool load(Game & game, const std::string & filename)
 				int type;
 				in >> type;
 				game.map.map.push_back(Cell(type));
+			} else {
+				int type, seen;
+				in >> type >> seen;
+				Cell cell = Cell(type);
+				cell.seen = seen;
+				game.map.map.push_back(cell);
 			}
 		}
 	}
@@ -103,6 +110,7 @@ bool load(Game & game, const std::string & filename)
 		game.doors.push_back(door);
 	}
 
+	game.invalidate_fov();
 	log("Game is successfully loaded.");
 	return true;
 }
