@@ -3,6 +3,8 @@
 #include "log.h"
 #include <fstream>
 
+enum { VERSION = 1 };
+
 bool save(const Game & game, const std::string & filename)
 {
 	log("Saving...");
@@ -11,6 +13,8 @@ bool save(const Game & game, const std::string & filename)
 		log("Cannot open {0} for writing!").arg(filename);
 		return false;
 	}
+	out << VERSION << '\n';
+
 	out << game.player.x << ' ' << game.player.y << '\n';
 
 	out << Cell::types().size() << '\n';
@@ -44,6 +48,13 @@ bool load(Game & game, const std::string & filename)
 		return false;
 	}
 	game = Game();
+	int version;
+	in >> version;
+	if(version < 1) {
+		log("Invalid save file version {0}").arg(version);
+		return false;
+	}
+
 	in >> game.player.x >> game.player.y;
 
 	Cell::types().clear();
@@ -54,8 +65,10 @@ bool load(Game & game, const std::string & filename)
 		in >> sprite >> passable;
 		std::string name;
 		char c;
-		in >> c;
+		in >> std::noskipws >> c;
 		getline(in, name, '\n');
+		log("sprite: {1}, passable: {2}, C: {0}, name: {3}").arg(int(c)).arg(sprite).arg(passable).arg(name);
+		in >> std::skipws;
 		Cell::types().push_back(CellType(sprite, passable == 1, name));
 	}
 
@@ -63,9 +76,11 @@ bool load(Game & game, const std::string & filename)
 	game.map.map.clear();
 	for(int y = 0; y < game.map.height; ++y) {
 		for(int x = 0; x < game.map.width; ++x) {
-			int type;
-			in >> type;
-			game.map.map.push_back(Cell(type));
+			if(version == 1) {
+				int type;
+				in >> type;
+				game.map.map.push_back(Cell(type));
+			}
 		}
 	}
 
@@ -77,8 +92,10 @@ bool load(Game & game, const std::string & filename)
 		std::string name;
 		in >> x >> y >> opened >> sprite;
 		char c;
-		in >> c;
+		in >> std::noskipws >> c;
 		getline(in, name, '\n');
+		in >> std::skipws;
+
 		Door door(x, y);
 		door.opened = opened == 1;
 		door.sprite = sprite;
