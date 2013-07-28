@@ -51,6 +51,7 @@ void Game::generate()
 	Cell brick_wall = Cell::register_type(CellType('#', false, false, "a brick wall"));
 	Cell wooden_wall = Cell::register_type(CellType('#', false, false, "a wooden wall"));
 	Cell doorway = Cell::register_type(CellType('.', true, true, "a doorway"));
+	Cell glass = Cell::register_type(CellType('=', false, true, "a glass wall"));
 
     for(int i = 0; i < 10; ++i) {
         int x = rand() % map.width;
@@ -63,6 +64,11 @@ void Game::generate()
         int x2 = map.width / 2 + rand() % (map.width / 2);
         for(int x = x1; x <= x2; ++x) {
             map.cell(x, y) = brick_wall;
+        }
+		int glass_start = x1 + 1 + rand() % (x2 - x1 - 2);
+		int glass_width = rand() % (x2 - 1 - glass_start);
+        for(int x = glass_start; x <= glass_start + glass_width; ++x) {
+            map.cell(x, y) = glass;
         }
 		int door_x = x1 + rand() % (x2 - x1);
 		map.cell(door_x, y) = doorway;
