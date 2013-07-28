@@ -32,7 +32,7 @@ void Door::close()
 //------------------------------------------------------------------------------
 
 Player::Player(int player_x, int player_y)
-	: x(player_x), y(player_y)
+	: x(player_x), y(player_y), sight(5)
 {
 }
 
@@ -320,6 +320,15 @@ int Game::height() const
 
 const Sprite & Game::sprite(int x, int y) const
 {
+	static Sprite CANNOT_SEE = ' ';
+	int dx = std::abs(x - player.x);
+	int dy = std::abs(y - player.y);
+	int distance = int(std::sqrt(dx * dx + dy * dy));
+	bool can_see = distance <= player.sight;
+
+	if(!can_see) {
+		return CANNOT_SEE;
+	}
 	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
 		if(door->x == x && door->y == y) {
 			return door->sprite;

@@ -27,6 +27,7 @@ struct Door {
 
 struct Player {
 	int x, y;
+	int sight;
 	Player(int player_x = 0, int player_y = 0);
 };
 
