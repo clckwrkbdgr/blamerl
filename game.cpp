@@ -193,8 +193,6 @@ bool Game::process_moving(const Control & control)
 
 bool Game::process_suicide(const Control & control)
 {
-	int shift_x = 0;
-	int shift_y = 0;
 	log("Suicide: {0}").arg(do_save);
 	log("Control is UP_LEFT: {0}").arg(control.value == Control::UP_LEFT);
 	switch(control.value) {

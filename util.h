@@ -89,7 +89,7 @@ public:
 			}
 		}
 		if(path_counter > 0) {
-			for(int i = 0; i < path.size(); ++i) {
+			for(size_t i = 0; i < path.size(); ++i) {
 			}
 
 			PathStep last_step = PathStep(player_x, player_y, path_counter);
@@ -108,8 +108,6 @@ public:
 					}
 
 				}
-			}
-			for(int i = 0; i < best_path.size(); ++i) {
 			}
 		}
 

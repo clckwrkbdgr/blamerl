@@ -9,6 +9,7 @@ BIN = blamerl
 LIBS = -lncurses
 SOURCES = $(wildcard *.cpp)
 OBJ = $(SOURCES:.cpp=.o)
+CXXFLAGS = -Werror -Wall
 
 run: deps $(BIN)
 	$(TERMINAL) './$(BIN)'
@@ -17,9 +18,9 @@ $(BIN): $(OBJ)
 	$(CXX) $(LIBS) -o $@ $^
 
 %.o: %.cpp
-	$(CXX) -c $<
+	$(CXX) $(CXXFLAGS) -c $<
 
-.PHONY: deps clean
+.PHONY: deps clean Makefile
 
 deps: $(OBJ:.o=.cpp)
 	$(CXX) -MM $^ > $@

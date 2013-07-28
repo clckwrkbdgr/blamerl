@@ -113,19 +113,19 @@ private:
     void run_replace();
 
     struct Field {
-        int begin, end;
+        size_t begin, end;
         std::string name;
         std::string repr;
         bool should_be_replaced;
         char fill;
-		int width, precision;
+		size_t width, precision;
         Field(int _begin = 0, int _end = 0, const std::string & field = 0);
         std::string basic_repr(const std::string & repr) const;
         std::string double_repr(double value) const;
     };
     std::vector<Field> fields;
 
-    int i;
+    unsigned int i;
     std::string result;
 };
 

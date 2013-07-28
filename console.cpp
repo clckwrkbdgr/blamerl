@@ -92,5 +92,6 @@ Control Console::get_control()
         case 'Q': return Control::SUICIDE;
         default: return Control::UNKNOWN;
     }
+	return Control::UNKNOWN;
 }
 

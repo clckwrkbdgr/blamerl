@@ -7,7 +7,7 @@ CellType::CellType(const Sprite & _sprite, bool _passable, bool _transparent, co
 }
 
 CellType::CellType()
-	: sprite(' '), passable(false), transparent(true)
+	: sprite(' '), passable(false), transparent(false)
 {
 }
 
