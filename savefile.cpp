@@ -70,7 +70,7 @@ bool load(Game & game, const std::string & filename)
 		getline(in, name, '\n');
 		log("sprite: {1}, passable: {2}, C: {0}, name: {3}").arg(int(c)).arg(sprite).arg(passable).arg(name);
 		in >> std::skipws;
-		Cell::types().push_back(CellType(sprite, passable == 1, name));
+		Cell::types().push_back(CellType(sprite, passable == 1, false, name));
 	}
 
 	in >> game.map.width >> game.map.height;

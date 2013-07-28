@@ -51,6 +51,7 @@ public:
 	const Sprite & sprite(int x, int y) const;
 	const std::string & name(int x, int y) const;
 	bool passable(int x, int y) const;
+	bool transparent(int x, int y) const;
 	bool show_cursor() const;
 
 	void open_at(int x, int y);

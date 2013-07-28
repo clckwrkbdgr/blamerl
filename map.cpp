@@ -1,8 +1,13 @@
 #include "map.h"
 #include <cstdlib>
 
-CellType::CellType(const Sprite & _sprite, bool _passable, const std::string & cell_name)
-	: sprite(_sprite), passable(_passable), name(cell_name)
+CellType::CellType(const Sprite & _sprite, bool _passable, bool _transparent, const std::string & cell_name)
+	: sprite(_sprite), passable(_passable), transparent(_transparent), name(cell_name)
+{
+}
+
+CellType::CellType()
+	: sprite(' '), passable(false), transparent(true)
 {
 }
 
@@ -27,6 +32,11 @@ bool Cell::passable() const
 	return types()[type].passable;
 }
 
+bool Cell::transparent() const
+{
+	return types()[type].transparent;
+}
+
 const std::string & Cell::name() const
 {
 	return types()[type].name;
@@ -40,7 +50,7 @@ int Cell::register_type(const CellType & cell_type)
 
 //------------------------------------------------------------------------------
 
-static Cell default_cell = Cell::register_type(CellType(' ', false, "void"));
+static Cell default_cell = Cell::register_type(CellType(' ', false, true, "void"));
 
 Map::Map()
 	: width(0), height(0)
@@ -49,7 +59,7 @@ Map::Map()
 
 Map::Map(int w, int h)
 	: width(w), height(h),
-	map(width * height, Cell::register_type(CellType('.', true, "floor")))
+	map(width * height, Cell::register_type(CellType('.', true, true, "floor")))
 {
 }
 

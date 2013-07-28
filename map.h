@@ -8,8 +8,10 @@ typedef int Sprite;
 struct CellType {
     Sprite sprite;
     bool passable;
+	bool transparent;
 	std::string name;
-    CellType(const Sprite & _sprite = ' ', bool _passable = false, const std::string & cell_name = std::string());
+    CellType();
+    CellType(const Sprite & _sprite, bool _passable, bool _transparent, const std::string & cell_name);
 };
 
 struct Cell {
@@ -20,6 +22,7 @@ struct Cell {
 	Cell(int cell_type);
 	const Sprite & sprite() const;
 	bool passable() const;
+	bool transparent() const;
 	const std::string & name() const;
 
 	static std::vector<CellType> & types();

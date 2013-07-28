@@ -47,10 +47,10 @@ void Game::generate()
 {
 	map = Map(80, 23);
 
-	Cell wall = Cell::register_type(CellType('#', false, "a wall"));
-	Cell brick_wall = Cell::register_type(CellType('#', false, "a brick wall"));
-	Cell wooden_wall = Cell::register_type(CellType('#', false, "a wooden wall"));
-	Cell doorway = Cell::register_type(CellType('.', true, "a doorway"));
+	Cell wall = Cell::register_type(CellType('#', false, false, "a wall"));
+	Cell brick_wall = Cell::register_type(CellType('#', false, false, "a brick wall"));
+	Cell wooden_wall = Cell::register_type(CellType('#', false, false, "a wooden wall"));
+	Cell doorway = Cell::register_type(CellType('.', true, true, "a doorway"));
 
     for(int i = 0; i < 10; ++i) {
         int x = rand() % map.width;
@@ -95,7 +95,7 @@ bool Game::move_by(int shift_x, int shift_y)
     }
     player.x += shift_x;
     player.y += shift_y;
-	static int STEP = Cell::register_type(CellType('*', true, "your step"));
+	static int STEP = Cell::register_type(CellType('*', true, true, "your step"));
 	map.cell(player.x, player.y) = STEP;
 	invalidate_fov();
     return true;
@@ -340,7 +340,7 @@ void Game::invalidate_fov()
 					double delta_error = std::abs(double(deltay) / double(deltax));
 					int cy = player.y;
 					for(int cx = player.x; cx != x; cx += ix) {
-						if(!passable(cx, cy)) {
+						if(!transparent(cx, cy)) {
 							can_see = false;
 							break;
 						}
@@ -355,7 +355,7 @@ void Game::invalidate_fov()
 					double delta_error = std::abs(double(deltax) / double(deltay));
 					int cx = player.x;
 					for(int cy = player.y; cy != y; cy += iy) {
-						if(!passable(cx, cy)) {
+						if(!transparent(cx, cy)) {
 							can_see = false;
 							break;
 						}
@@ -398,6 +398,16 @@ const std::string & Game::name(int x, int y) const
 		}
 	}
 	return map.cell(x, y).name();
+}
+
+bool Game::transparent(int x, int y) const
+{
+	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			return door->opened;
+		}
+	}
+	return map.cell(x, y).transparent();
 }
 
 bool Game::passable(int x, int y) const
