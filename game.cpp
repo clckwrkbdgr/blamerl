@@ -325,6 +325,44 @@ const Sprite & Game::sprite(int x, int y) const
 	int dy = std::abs(y - player.y);
 	int distance = int(std::sqrt(dx * dx + dy * dy));
 	bool can_see = distance <= player.sight;
+	if(can_see) {
+		int deltax = x - player.x;
+		int deltay = y - player.y;
+		double error = 0.0;
+		int iy = deltay > 0 ? 1 : -1;
+		int ix = deltax > 0 ? 1 : -1;
+		if(dx > dy) {
+			double delta_error = std::abs(double(deltay) / double(deltax));
+			int cy = player.y;
+			for(int cx = player.x; cx != x; cx += ix) {
+				if(!passable(cx, cy)) {
+					can_see = false;
+					break;
+				}
+
+				error += delta_error;
+				if(error > 0.5) {
+					cy += iy;
+					error -= 1.0;
+				}
+			}
+		} else {
+			double delta_error = std::abs(double(deltax) / double(deltay));
+			int cx = player.x;
+			for(int cy = player.y; cy != y; cy += iy) {
+				if(!passable(cx, cy)) {
+					can_see = false;
+					break;
+				}
+
+				error += delta_error;
+				if(error > 0.5) {
+					cx += ix;
+					error -= 1.0;
+				}
+			}
+		}
+	}
 
 	if(!can_see) {
 		return CANNOT_SEE;
