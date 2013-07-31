@@ -17,18 +17,24 @@ int main(int argc, char ** argv)
 	}
     log("Game started.");
 
-	while(true) {
-		console.draw_game(game);
+    try {
+        while(true) {
+            console.draw_game(game);
 
-		Control control = console.get_control();
-		if(!game.process_control(control)) {
-			break;
-		}
-	}
+            Control control = console.get_control();
+            if(!game.process_control(control)) {
+                break;
+            }
+        }
 
-	if(game.do_save) {
-		save(game, "blamerl.save");
-	}
+        if(game.do_save) {
+            save(game, "blamerl.save");
+        }
+    } catch(const Map::OutOfMapException & e) {
+        log("Out of map exception: {0}, {1} is out of (0, 0, {2}, {3}) map rect.").
+            arg(e.x).arg(e.y).arg(game.width()).arg(game.height());
+    }
+
 	log("Exiting...");
 
 	return 0;

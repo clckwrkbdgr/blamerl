@@ -19,19 +19,20 @@ struct Cell {
 	bool visible;
 	bool seen;
 
-	Cell(int cell_type);
-	const Sprite & sprite() const;
-	bool passable() const;
-	bool transparent() const;
-	const std::string & name() const;
-
-	static std::vector<CellType> & types();
-	static int register_type(const CellType & cell_type);
+	Cell(int cell_type = 0);
 };
 
 class Map {
 public:
+    struct OutOfMapException { int x, y; OutOfMapException(int _x, int _y) : x(_x), y(_y) {} };
+
 	int width, height;
+
+    std::vector<CellType> cell_types;
+    unsigned register_type(const CellType & cell_type);
+    const CellType & get_cell_type(const Cell & cell) const;
+    const CellType & get_cell_type(unsigned cell_type_id) const;
+
 	std::vector<Cell> map;
 
 	Map();

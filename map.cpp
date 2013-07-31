@@ -7,7 +7,7 @@ CellType::CellType(const Sprite & _sprite, bool _passable, bool _transparent, co
 }
 
 CellType::CellType()
-	: sprite(' '), passable(false), transparent(false)
+	: sprite(' '), passable(false), transparent(true), name("void")
 {
 }
 
@@ -16,41 +16,27 @@ Cell::Cell(int cell_type)
 {
 }
 
-std::vector<CellType> & Cell::types()
-{
-	static std::vector<CellType> map;
-	return map;
-}
-
-const Sprite & Cell::sprite() const
-{
-	return types()[type].sprite;
-}
-
-bool Cell::passable() const
-{
-	return types()[type].passable;
-}
-
-bool Cell::transparent() const
-{
-	return types()[type].transparent;
-}
-
-const std::string & Cell::name() const
-{
-	return types()[type].name;
-}
-
-int Cell::register_type(const CellType & cell_type)
-{
-	types().push_back(cell_type);
-	return types().size() - 1;
-}
-
 //------------------------------------------------------------------------------
 
-static Cell default_cell = Cell::register_type(CellType(' ', false, true, "void"));
+unsigned Map::register_type(const CellType & cell_type)
+{
+	cell_types.push_back(cell_type);
+	return cell_types.size() - 1;
+}
+
+const CellType & Map::get_cell_type(const Cell & cell) const
+{
+    return get_cell_type(cell.type);
+}
+
+const CellType & Map::get_cell_type(unsigned cell_type_id) const
+{
+    if(cell_type_id >= cell_types.size()) {
+        static CellType void_cell;
+        return void_cell;
+    }
+    return cell_types[cell_type_id];
+}
 
 Map::Map()
 	: width(0), height(0)
@@ -58,8 +44,7 @@ Map::Map()
 }
 
 Map::Map(int w, int h)
-	: width(w), height(h),
-	map(width * height, Cell::register_type(CellType('.', true, true, "floor")))
+	: width(w), height(h), map(width * height)
 {
 }
 
@@ -71,7 +56,7 @@ bool Map::valid(int x, int y) const
 Cell & Map::cell(int x, int y)
 {
 	if(!valid(x, y)) {
-		return default_cell;
+        throw OutOfMapException(x, y);
 	}
 	return map[x + y * width];
 }
@@ -79,7 +64,7 @@ Cell & Map::cell(int x, int y)
 const Cell & Map::cell(int x, int y) const
 {
 	if(!valid(x, y)) {
-		return default_cell;
+        throw OutOfMapException(x, y);
 	}
 	return map[x + y * width];
 }

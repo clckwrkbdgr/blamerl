@@ -17,8 +17,8 @@ bool save(const Game & game, const std::string & filename)
 
 	out << game.player.x << ' ' << game.player.y << '\n';
 
-	out << Cell::types().size() << '\n';
-	for(std::vector<CellType>::const_iterator cell_type = Cell::types().begin(); cell_type != Cell::types().end(); ++cell_type) {
+	out << game.map.cell_types.size() << '\n';
+	for(std::vector<CellType>::const_iterator cell_type = game.map.cell_types.begin(); cell_type != game.map.cell_types.end(); ++cell_type) {
 		out << int(cell_type->sprite) << ' ' << (cell_type->passable ? 1 : 0) << ' ' << (cell_type->transparent ? 1 : 0) << ' ' << cell_type->name << '\n';
 	}
 
@@ -58,7 +58,7 @@ bool load(Game & game, const std::string & filename)
 
 	in >> game.player.x >> game.player.y;
 
-	Cell::types().clear();
+	game.map.cell_types.clear();
 	int cell_types_count = 0;
 	in >> cell_types_count;
 	while(cell_types_count--) {
@@ -73,7 +73,7 @@ bool load(Game & game, const std::string & filename)
 		in >> std::noskipws >> c;
 		getline(in, name, '\n');
 		in >> std::skipws;
-		Cell::types().push_back(CellType(sprite, passable == 1, transparent == 1, name));
+		game.map.cell_types.push_back(CellType(sprite, passable == 1, transparent == 1, name));
 		log("Cell type: sprite '{0}' pass:{1} transp:{2}, name='{3}'").arg(sprite).arg(passable).arg(transparent).arg(name);
 	}
 

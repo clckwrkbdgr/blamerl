@@ -45,13 +45,14 @@ Game::Game()
 
 void Game::generate()
 {
+    log("Generating new map...");
 	map = Map(80, 23);
 
-	Cell wall = Cell::register_type(CellType('#', false, false, "a wall"));
-	Cell brick_wall = Cell::register_type(CellType('#', false, false, "a brick wall"));
-	Cell wooden_wall = Cell::register_type(CellType('#', false, false, "a wooden wall"));
-	Cell doorway = Cell::register_type(CellType('.', true, true, "a doorway"));
-	Cell glass = Cell::register_type(CellType('=', false, true, "a glass wall"));
+	Cell wall = map.register_type(CellType('#', false, false, "a wall"));
+	Cell brick_wall = map.register_type(CellType('#', false, false, "a brick wall"));
+	Cell wooden_wall = map.register_type(CellType('#', false, false, "a wooden wall"));
+	Cell doorway = map.register_type(CellType('.', true, true, "a doorway"));
+	Cell glass = map.register_type(CellType('=', false, true, "a glass wall"));
 
     for(int i = 0; i < 10; ++i) {
         int x = rand() % map.width;
@@ -101,8 +102,6 @@ bool Game::move_by(int shift_x, int shift_y)
     }
     player.x += shift_x;
     player.y += shift_y;
-	static int STEP = Cell::register_type(CellType('*', true, true, "your step"));
-	map.cell(player.x, player.y) = STEP;
 	invalidate_fov();
     return true;
 }
@@ -330,6 +329,9 @@ void Game::invalidate_fov()
 {
 	for(int x = player.x - player.sight; x <= player.x + player.sight; ++x) {
 		for(int y = player.y - player.sight; y <= player.y + player.sight; ++y) {
+            if(!map.valid(x, y)) {
+                continue;
+            }
 			int dx = std::abs(x - player.x);
 			int dy = std::abs(y - player.y);
 			int distance = int(std::sqrt(dx * dx + dy * dy));
@@ -391,7 +393,7 @@ const Sprite & Game::sprite(int x, int y) const
 			return door->sprite;
 		}
 	}
-	return map.cell(x, y).sprite();
+	return map.get_cell_type(map.cell(x, y)).sprite;
 }
 
 const std::string & Game::name(int x, int y) const
@@ -401,7 +403,7 @@ const std::string & Game::name(int x, int y) const
 			return door->name;
 		}
 	}
-	return map.cell(x, y).name();
+	return map.get_cell_type(map.cell(x, y)).name;
 }
 
 bool Game::transparent(int x, int y) const
@@ -411,7 +413,7 @@ bool Game::transparent(int x, int y) const
 			return door->opened;
 		}
 	}
-	return map.cell(x, y).transparent();
+	return map.get_cell_type(map.cell(x, y)).transparent;
 }
 
 bool Game::passable(int x, int y) const
@@ -421,7 +423,7 @@ bool Game::passable(int x, int y) const
 			return door->opened;
 		}
 	}
-	return map.cell(x, y).passable();
+	return map.get_cell_type(map.cell(x, y)).passable;
 }
 
 void Game::open_at(int x, int y)

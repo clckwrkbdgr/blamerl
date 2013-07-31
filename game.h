@@ -14,7 +14,6 @@ public:
     Control(int v = UNKNOWN, bool running = false);
 };
 
-
 struct Door {
 	int x, y;
 	bool opened;
