@@ -32,7 +32,7 @@ struct Player {
 
 class Game {
 public:
-	enum State { MOVING, EXAMINING, OPENING, CLOSING, SUICIDING } state;
+	enum State { MOVING, RUNNING, EXAMINING, OPENING, CLOSING, SUICIDING } state;
 	Map map;
 	std::vector<Door> doors;
 	bool do_save;
@@ -52,6 +52,8 @@ public:
 	bool passable(int x, int y) const;
 	bool transparent(int x, int y) const;
 	bool show_cursor() const;
+    bool has_auto_control() const;
+    Control auto_control;
 
 	void open_at(int x, int y);
 	void close_at(int x, int y);
@@ -63,6 +65,7 @@ public:
 	void invalidate_fov();
 
 	bool process_moving(const Control & control);
+	bool process_running(const Control & control);
 	bool process_examining(const Control & control);
 	bool process_opening(const Control & control);
 	bool process_closing(const Control & control);

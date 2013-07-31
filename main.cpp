@@ -21,7 +21,7 @@ int main(int argc, char ** argv)
         while(true) {
             console.draw_game(game);
 
-            Control control = console.get_control();
+            Control control = game.has_auto_control() ? game.auto_control : console.get_control();
             if(!game.process_control(control)) {
                 break;
             }

@@ -151,6 +151,11 @@ bool Game::show_cursor() const
 	return (state == EXAMINING);
 }
 
+bool Game::has_auto_control() const
+{
+    return (auto_control.value != Control::UNKNOWN);
+}
+
 bool Game::process_moving(const Control & control)
 {
 	message = "";
@@ -185,13 +190,45 @@ bool Game::process_moving(const Control & control)
 
 	if(shift_x != 0 || shift_y != 0) {
 		if(control.run) {
-			bool running = true;
+            auto_control = control.value;
+            state = RUNNING;
+			/*bool running = true;
 			while(running) {
 				running = move_by(shift_x, shift_y);
-			}
+			}*/
 		} else {
 			move_by(shift_x, shift_y);
 		}
+	}
+	return true;
+}
+
+bool Game::process_running(const Control & control)
+{
+	message = "";
+	int shift_x = 0;
+	int shift_y = 0;
+	switch(control.value) {
+		case Control::LEFT: shift_x = -1; shift_y = 0; break;
+		case Control::DOWN: shift_x = 0; shift_y = 1; break;
+		case Control::UP: shift_x = 0; shift_y = -1; break;
+		case Control::RIGHT: shift_x = 1; shift_y = 0; break;
+		case Control::DOWN_LEFT: shift_x = -1; shift_y = 1; break;
+		case Control::DOWN_RIGHT: shift_x = 1; shift_y = 1; break;
+		case Control::UP_LEFT: shift_x = -1; shift_y = -1; break;
+		case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
+		default:
+            state = MOVING;
+            auto_control = Control::UNKNOWN;
+            break;
+	}
+
+	if(shift_x != 0 || shift_y != 0) {
+        bool ok = move_by(shift_x, shift_y);
+        if(!ok) {
+            state = MOVING;
+            auto_control = Control::UNKNOWN;
+        }
 	}
 	return true;
 }
@@ -306,6 +343,7 @@ bool Game::process_control(const Control & control)
 {
 	switch(state) {
 		case MOVING: return process_moving(control);
+		case RUNNING: return process_running(control);
 		case EXAMINING: return process_examining(control);
 		case OPENING: return process_opening(control);
 		case CLOSING: return process_closing(control);
