@@ -40,6 +40,8 @@ public:
 
 	bool valid(int x, int y) const;
 
+    void fill(const Cell & filler);
+
 	Cell & cell(int x, int y);
 	const Cell & cell(int x, int y) const;
 };

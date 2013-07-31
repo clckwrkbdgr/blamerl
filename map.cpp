@@ -53,6 +53,13 @@ bool Map::valid(int x, int y) const
 	return (x >= 0 && x < width && y >= 0 && y < height);
 }
 
+void Map::fill(const Cell & filler)
+{
+    for(std::vector<Cell>::iterator c = map.begin(); c != map.end(); ++c) {
+        *c = filler;
+    }
+}
+
 Cell & Map::cell(int x, int y)
 {
 	if(!valid(x, y)) {

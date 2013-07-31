@@ -48,11 +48,14 @@ void Game::generate()
     log("Generating new map...");
 	map = Map(80, 23);
 
+	Cell floor = map.register_type(CellType('.', true, true, "a floor"));
 	Cell wall = map.register_type(CellType('#', false, false, "a wall"));
 	Cell brick_wall = map.register_type(CellType('#', false, false, "a brick wall"));
 	Cell wooden_wall = map.register_type(CellType('#', false, false, "a wooden wall"));
 	Cell doorway = map.register_type(CellType('.', true, true, "a doorway"));
 	Cell glass = map.register_type(CellType('=', false, true, "a glass wall"));
+
+    map.fill(floor);
 
     for(int i = 0; i < 10; ++i) {
         int x = rand() % map.width;
@@ -123,14 +126,12 @@ bool Game::move_to(int target_x, int target_y)
 	}
 
 	MapPassabilityDetector detector(*this);
-	Pathfinder pathfinder(player.x, player.y, target_x, target_y);
-	bool found = pathfinder.find_path(&detector);
-
-	if(found) {
-		while(pathfinder.next()) {
-            move_by(pathfinder.shift_x(), pathfinder.shift_y());
-		}
-	}
+    auto_control_list = find_path(player.x, player.y, target_x, target_y, &detector);
+    if(!auto_control_list.empty()) {
+        state = RUNNING;
+    }
+    log("State: {0} == {1}").arg(state).arg(RUNNING);
+    auto_control = Control::UNKNOWN;
 
     return true;
 }
@@ -153,7 +154,15 @@ bool Game::show_cursor() const
 
 bool Game::has_auto_control() const
 {
-    return (auto_control.value != Control::UNKNOWN);
+    return !(auto_control_list.empty() && auto_control.value == Control::UNKNOWN);
+}
+
+Control Game::get_auto_control() const
+{
+    if(!auto_control_list.empty()) {
+        return auto_control_list.front();
+    }
+    return auto_control;
 }
 
 bool Game::process_moving(const Control & control)
@@ -192,10 +201,6 @@ bool Game::process_moving(const Control & control)
 		if(control.run) {
             auto_control = control.value;
             state = RUNNING;
-			/*bool running = true;
-			while(running) {
-				running = move_by(shift_x, shift_y);
-			}*/
 		} else {
 			move_by(shift_x, shift_y);
 		}
@@ -220,16 +225,34 @@ bool Game::process_running(const Control & control)
 		default:
             state = MOVING;
             auto_control = Control::UNKNOWN;
-            break;
+            return true;
 	}
 
+    log("running: {0}, {1}").arg(shift_x).arg(shift_y);
+
 	if(shift_x != 0 || shift_y != 0) {
-        bool ok = move_by(shift_x, shift_y);
-        if(!ok) {
+        if(move_by(shift_x, shift_y)) {
+            if(!auto_control_list.empty()) {
+                auto_control_list.pop_front();
+                log("Popped; now size is {0}").arg(auto_control_list.size());
+                if(!has_auto_control()) {
+                    state = MOVING;
+                    auto_control = Control::UNKNOWN;
+                }
+                return true;
+            } else if(!has_auto_control()) {
+                state = MOVING;
+                auto_control = Control::UNKNOWN;
+            }
+        } else {
             state = MOVING;
             auto_control = Control::UNKNOWN;
         }
+    } else {
+        state = MOVING;
+        auto_control = Control::UNKNOWN;
 	}
+
 	return true;
 }
 
@@ -273,7 +296,6 @@ bool Game::process_examining(const Control & control)
 		case Control::UP_RIGHT: shift_x = 1; shift_y = -1; break;
 		case Control::TARGET: {
 			move_to(cursor_x, cursor_y);
-			state = MOVING;
 			break;
 		}
 		default: break;
@@ -341,6 +363,8 @@ bool Game::process_closing(const Control & control)
 
 bool Game::process_control(const Control & control)
 {
+    log("Control is {0}, state is {1}").arg(char(control.value)).arg(state);
+    log("has auto control: {0}, control: {1}, list size: {2}").arg(has_auto_control()).arg(char(auto_control.value)).arg(auto_control_list.size());
 	switch(state) {
 		case MOVING: return process_moving(control);
 		case RUNNING: return process_running(control);

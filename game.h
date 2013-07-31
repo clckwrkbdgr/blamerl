@@ -1,12 +1,13 @@
 #pragma once
 #include "map.h"
+#include <list>
 
 class Control {
 public:
     enum Type { UNKNOWN, CANCEL,
-        LEFT, RIGHT, DOWN, UP, DOWN_LEFT, DOWN_RIGHT, UP_LEFT, UP_RIGHT,
-        EXAMINE, TARGET, OPEN, CLOSE, SUICIDE,
-        QUIT
+        LEFT = 'h', RIGHT = 'l', DOWN = 'j', UP = 'k', DOWN_LEFT = 'b', DOWN_RIGHT = 'n', UP_LEFT = 'y', UP_RIGHT = 'u',
+        EXAMINE = 'x', TARGET = '.', OPEN = 'o', CLOSE = 'c', SUICIDE = 'Q',
+        QUIT = 'q'
     };
 
     int value;
@@ -52,8 +53,11 @@ public:
 	bool passable(int x, int y) const;
 	bool transparent(int x, int y) const;
 	bool show_cursor() const;
+
     bool has_auto_control() const;
     Control auto_control;
+    std::list<Control> auto_control_list;
+    Control get_auto_control() const;
 
 	void open_at(int x, int y);
 	void close_at(int x, int y);
