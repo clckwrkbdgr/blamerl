@@ -8,24 +8,25 @@ endif
 BIN = blamerl
 LIBS = -lncurses
 SOURCES = $(wildcard *.cpp)
-OBJ = $(SOURCES:.cpp=.o)
+OBJ = $(addprefix tmp/,$(SOURCES:.cpp=.o))
 CXXFLAGS = -Werror -Wall
 
-run: deps $(BIN)
+run: $(BIN)
 	$(TERMINAL) './$(BIN)'
 
-$(BIN): $(OBJ)
-	$(CXX) $(LIBS) -o $@ $^
+$(BIN): tmp/deps $(OBJ)
+	$(CXX) $(LIBS) -o $@ $(OBJ)
 
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $<
+tmp/%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-.PHONY: deps clean Makefile
+.PHONY: tmp/deps clean Makefile
 
-deps: $(OBJ:.o=.cpp)
+tmp/deps: $(SOURCES)
 	$(CXX) -MM $^ > $@
 
 clean:
-	$(RM) -rf *.o $(BIN) deps
+	$(RM) -rf tmp/*.o $(BIN) tmp/deps
 
-include deps
+$(shell mkdir -p tmp)
+include tmp/deps
