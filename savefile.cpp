@@ -31,8 +31,8 @@ bool save(const Game & game, const std::string & filename)
 		out << '\n';
 	}
 
-	out << game.doors.size() << '\n';
-	for(std::vector<Door>::const_iterator door = game.doors.begin(); door != game.doors.end(); ++door) {
+	out << game.map.doors.size() << '\n';
+	for(std::vector<Door>::const_iterator door = game.map.doors.begin(); door != game.map.doors.end(); ++door) {
 		out << door->x << ' ' << door->y << ' ' << (door->opened ? 1 : 0) << ' ' << int(door->sprite) << ' ' << door->name << '\n';
 	}
 
@@ -95,7 +95,7 @@ bool load(Game & game, const std::string & filename)
 		}
 	}
 
-	game.doors.clear();
+	game.map.doors.clear();
 	int door_count = 0;
 	in >> door_count;
 	while(door_count--) {
@@ -111,7 +111,7 @@ bool load(Game & game, const std::string & filename)
 		door.opened = opened == 1;
 		door.sprite = sprite;
 		door.name = name;
-		game.doors.push_back(door);
+		game.map.doors.push_back(door);
 	}
 
 	game.invalidate_fov();

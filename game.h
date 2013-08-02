@@ -15,16 +15,6 @@ public:
     Control(int v = UNKNOWN, bool running = false);
 };
 
-struct Door {
-	int x, y;
-	bool opened;
-	Sprite sprite;
-	std::string name;
-	Door(int _x, int _y);
-	void open();
-	void close();
-};
-
 struct Player {
 	int x, y;
 	int sight;
@@ -35,7 +25,6 @@ class Game {
 public:
 	enum State { MOVING, RUNNING, EXAMINING, OPENING, CLOSING, SUICIDING } state;
 	Map map;
-	std::vector<Door> doors;
 	bool do_save;
     bool examining;
     int cursor_x, cursor_y;

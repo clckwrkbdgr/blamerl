@@ -22,11 +22,23 @@ struct Cell {
 	Cell(int cell_type = 0);
 };
 
+struct Door {
+	int x, y;
+	bool opened;
+	Sprite sprite;
+	std::string name;
+	Door(int _x, int _y);
+	void open();
+	void close();
+};
+
 class Map {
 public:
     struct OutOfMapException { int x, y; OutOfMapException(int _x, int _y) : x(_x), y(_y) {} };
 
 	int width, height;
+
+	std::vector<Door> doors;
 
     std::vector<CellType> cell_types;
     unsigned register_type(const CellType & cell_type);
