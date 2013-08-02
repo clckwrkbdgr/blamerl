@@ -49,6 +49,7 @@ public:
 
 	Map();
 	Map(int w, int h);
+    void generate(int w, int h);
 
 	bool valid(int x, int y) const;
 

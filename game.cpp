@@ -47,75 +47,37 @@ void Game::generate()
 {
     log("Generating new map...");
 
-	map = Map(80, 23);
-    log("Cells created: {0}.").arg(map.map.size());
-
-	Cell floor = map.register_type(CellType('.', true, true, "a floor"));
-	Cell wall = map.register_type(CellType('#', false, false, "a wall"));
-	Cell brick_wall = map.register_type(CellType('#', false, false, "a brick wall"));
-	Cell wooden_wall = map.register_type(CellType('#', false, false, "a wooden wall"));
-	Cell doorway = map.register_type(CellType('.', true, true, "a doorway"));
-	Cell glass = map.register_type(CellType('=', false, true, "a glass wall"));
-    log("Cell types registered: {0}.").arg(map.cell_types.size());
-
-    map.fill(floor);
-    log("Map filled with floor.");
-
-    for(int i = 0; i < 10; ++i) {
-        int x = rand() % map.width;
-        int y = rand() % map.height;
-        map.cell(x, y) = wall;
-    }
-    log("Random columns  placed.");
-    for(int i = 0; i < 5; ++i) {
-        int x1 = rand() % (map.width / 2);
-        int y = rand() % map.height;
-        int x2 = map.width / 2 + rand() % (map.width / 2);
-        for(int x = x1; x <= x2; ++x) {
-            map.cell(x, y) = brick_wall;
-        }
-		int glass_start = x1 + 1 + rand() % (x2 - x1 - 2);
-		int glass_width = rand() % (x2 - 1 - glass_start);
-        for(int x = glass_start; x <= glass_start + glass_width; ++x) {
-            map.cell(x, y) = glass;
-        }
-		int door_x = x1 + rand() % (x2 - x1);
-		map.cell(door_x, y) = doorway;
-		map.doors.push_back(Door(door_x, y));
-    }
-    log("Horizontal walls placed.");
-    for(int i = 0; i < 5; ++i) {
-        int x = rand() % map.width;
-        int y1 = rand() % (map.height / 2);
-        int y2 = map.height / 2 + rand() % (map.height / 2);
-        for(int y = y1; y <= y2; ++y) {
-            map.cell(x, y) = wooden_wall;
-        }
-		int door_y = y1 + rand() % (y2 - y1);
-		map.cell(x, door_y) = doorway;
-		map.doors.push_back(Door(x, door_y));
-    }
-    log("Vertical walls placed.");
+	map.generate(80, 23);
 
 	player.x = map.width / 2;
 	player.y = map.height / 2;
-    log("Player placed to center: {0}, {1}.").arg(player.x).arg(player.y);
 	invalidate_fov();
     log("FOV invalidated.");
-
-    state = MOVING;
-    message = "You have moved to a new place.";
-    auto_control = Control::UNKNOWN;
-    auto_control_list.clear();
-    log("Map is successfully generated.");
 }
 
 bool Game::move_by(int shift_x, int shift_y)
 {
     if(!map.valid(player.x + shift_x, player.y + shift_y)) {
-        generate();
+        int old_player_x = player.x + shift_x;
+        int old_player_y = player.y + shift_y;
+
+        map.generate(80, 23);
+
+        while(old_player_x >= map.width)  { old_player_x = old_player_x - map.width; }
+        while(old_player_x < 0)           { old_player_x = old_player_x + map.width; }
+        while(old_player_y >= map.height) { old_player_y = old_player_y - map.height; }
+        while(old_player_y < 0)           { old_player_y = old_player_y + map.height; }
+        player.x = old_player_x;
+        player.y = old_player_y;
+        log("Player entered the scene at {0}, {1}.").arg(player.x).arg(player.y);
+        invalidate_fov();
+        log("FOV invalidated.");
+
+        state = MOVING;
+        message = "You have moved to a new place.";
+        auto_control = Control::UNKNOWN;
+        auto_control_list.clear();
         return true;
-        //return false;
     }
     if(!passable(player.x + shift_x, player.y + shift_y)) {
         return false;
