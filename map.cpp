@@ -74,7 +74,7 @@ void Map::generate(int w, int h)
         int y = rand() % height;
         cell(x, y) = wall;
     }
-    log("Random columns  placed.");
+    log("Random columns placed.");
     for(int i = 0; i < 5; ++i) {
         int x1 = rand() % (width / 2);
         int y = rand() % height;
@@ -82,14 +82,19 @@ void Map::generate(int w, int h)
         for(int x = x1; x <= x2; ++x) {
             cell(x, y) = brick_wall;
         }
-		int glass_start = x1 + 1 + rand() % (x2 - x1 - 2);
-		int glass_width = rand() % (x2 - 1 - glass_start);
-        for(int x = glass_start; x <= glass_start + glass_width; ++x) {
-            cell(x, y) = glass;
+        log("\tWall created {0}..{1} at y={2}").arg(x1).arg(x2).arg(y);
+        if(x2 - x1 > 2) {
+            int glass_start = x1 + 1 + rand() % (x2 - x1 - 2);
+            int glass_width = rand() % (x2 - 1 - glass_start);
+            for(int x = glass_start; x <= glass_start + glass_width; ++x) {
+                cell(x, y) = glass;
+            }
+            log("\tGlass settled: {0}..{1}.").arg(glass_start).arg(glass_start + glass_width);
         }
 		int door_x = x1 + rand() % (x2 - x1);
 		cell(door_x, y) = doorway;
 		doors.push_back(Door(door_x, y));
+        log("\tDoor placed at {0}, {1}.").arg(door_x).arg(y);
     }
     log("Horizontal walls placed.");
     for(int i = 0; i < 5; ++i) {
