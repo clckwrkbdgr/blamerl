@@ -3,7 +3,7 @@
 #include "log.h"
 #include <fstream>
 
-enum { VERSION = 3 };
+enum { VERSION = 4 };
 
 bool save(const Game & game, const std::string & filename)
 {
@@ -16,6 +16,7 @@ bool save(const Game & game, const std::string & filename)
 	out << VERSION << '\n';
 
 	out << game.player.x << ' ' << game.player.y << '\n';
+	out << game.world_x << ' ' << game.world_y << '\n';
 
 	out << game.map.cell_types.size() << '\n';
 	for(std::vector<CellType>::const_iterator cell_type = game.map.cell_types.begin(); cell_type != game.map.cell_types.end(); ++cell_type) {
@@ -57,6 +58,9 @@ bool load(Game & game, const std::string & filename)
 	}
 
 	in >> game.player.x >> game.player.y;
+    if(version >= 4) {
+        in >> game.world_x >> game.world_y;
+    }
 
 	game.map.cell_types.clear();
 	int cell_types_count = 0;
