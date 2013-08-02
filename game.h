@@ -28,6 +28,7 @@ public:
 	bool do_save;
     bool examining;
     int cursor_x, cursor_y;
+    int world_x, world_y;
 	Player player;
 	std::string message;
 

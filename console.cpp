@@ -3,6 +3,8 @@
 #include "game.h"
 #include "log.h"
 
+enum { HUD_WIDTH = 20, MESSAGE_HEIGHT = 1 };
+
 Console::Console()
 {
 	initscr();
@@ -26,6 +28,9 @@ void Console::draw_game(const Game & game)
 {
 	int width, height;
 	getmaxyx(stdscr, height, width);
+    int message_pan_y = height - MESSAGE_HEIGHT;
+    int hud_x = width - HUD_WIDTH;
+
 	for(int x = 0; x < game.width(); ++x) {
 		for(int y = 0; y < game.height(); ++y) {
 			Sprite sprite = game.sprite(x, y);
@@ -35,8 +40,10 @@ void Console::draw_game(const Game & game)
 
 	mvaddch(game.player.y, game.player.x, '@');
 
-	mvprintw(height - 1, 0, "%s", std::string(width, ' ').c_str());
-	mvprintw(height - 1, 0, "%s", game.message.c_str());
+	mvprintw(message_pan_y, 0, "%s", std::string(width, ' ').c_str());
+	mvprintw(message_pan_y, 0, "%s", game.message.c_str());
+
+    mvprintw(0, hud_x, "%s", format("World: ({0}, {1})").arg(game.world_x).arg(game.world_y).str().substr(0, HUD_WIDTH).c_str());
 
     if(game.show_cursor()) {
         curs_set(1);

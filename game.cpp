@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cstdlib>
 
+enum { MAP_WIDTH = 60, MAP_HEIGHT = 23 };
+
 Control::Control(int v, bool running)
     : value(v), run(running)
 {
@@ -39,7 +41,7 @@ Player::Player(int player_x, int player_y)
 //------------------------------------------------------------------------------
 
 Game::Game()
-	: state(MOVING), do_save(true), examining(false)
+	: state(MOVING), do_save(true), examining(false), world_x(0), world_y(0)
 {
 }
 
@@ -47,7 +49,10 @@ void Game::generate()
 {
     log("Generating new map...");
 
-	map.generate(80, 23);
+	map.generate(MAP_WIDTH, MAP_HEIGHT);
+
+    world_x = 0;
+    world_y = 0;
 
 	player.x = map.width / 2;
 	player.y = map.height / 2;
@@ -61,12 +66,12 @@ bool Game::move_by(int shift_x, int shift_y)
         int old_player_x = player.x + shift_x;
         int old_player_y = player.y + shift_y;
 
-        map.generate(80, 23);
+        map.generate(MAP_WIDTH, MAP_HEIGHT);
 
-        while(old_player_x >= map.width)  { old_player_x = old_player_x - map.width; }
-        while(old_player_x < 0)           { old_player_x = old_player_x + map.width; }
-        while(old_player_y >= map.height) { old_player_y = old_player_y - map.height; }
-        while(old_player_y < 0)           { old_player_y = old_player_y + map.height; }
+        while(old_player_x >= map.width)  { old_player_x = old_player_x - map.width;  ++world_x; }
+        while(old_player_x < 0)           { old_player_x = old_player_x + map.width;  --world_x; }
+        while(old_player_y >= map.height) { old_player_y = old_player_y - map.height; ++world_y; }
+        while(old_player_y < 0)           { old_player_y = old_player_y + map.height; --world_y; }
         player.x = old_player_x;
         player.y = old_player_y;
         log("Player entered the scene at {0}, {1}.").arg(player.x).arg(player.y);
