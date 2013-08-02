@@ -17,6 +17,33 @@ Cell::Cell(int cell_type)
 {
 }
 
+// --------------------------------------------------------------------------
+
+Transport::Transport(int _x, int _y, bool _is_up, const std::string & _name)
+    : x(_x), y(_y), is_up(_is_up), sprite(is_up ? '<' : '>'), name(_name)
+{
+}
+
+// --------------------------------------------------------------------------
+
+Door::Door(int _x, int _y)
+	: x(_x), y(_y), opened(false), sprite('+')
+{
+	name = "a door";
+}
+
+void Door::open()
+{
+	opened = true;
+	sprite = '-';
+}
+
+void Door::close()
+{
+	opened = false;
+	sprite = '+';
+}
+
 //------------------------------------------------------------------------------
 
 unsigned Map::register_type(const CellType & cell_type)
@@ -109,6 +136,10 @@ void Map::generate(int w, int h)
 		doors.push_back(Door(x, door_y));
     }
     log("Vertical walls placed.");
+
+    transports.clear();
+    transports.push_back(Transport(rand() % width, rand() % height, false, "a downstairs"));
+    transports.push_back(Transport(rand() % width, rand() % height, true, "an upstairs"));
 
     log("Map is successfully generated.");
 }

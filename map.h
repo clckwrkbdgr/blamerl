@@ -32,6 +32,14 @@ struct Door {
 	void close();
 };
 
+struct Transport {
+    int x, y;
+    bool is_up;
+    Sprite sprite;
+    std::string name;
+    Transport(int _x, int _y, bool _is_up, const std::string & _name);
+};
+
 class Map {
 public:
     struct OutOfMapException { int x, y; OutOfMapException(int _x, int _y) : x(_x), y(_y) {} };
@@ -39,6 +47,7 @@ public:
 	int width, height;
 
 	std::vector<Door> doors;
+	std::vector<Transport> transports;
 
     std::vector<CellType> cell_types;
     unsigned register_type(const CellType & cell_type);
