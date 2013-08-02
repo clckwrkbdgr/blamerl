@@ -172,3 +172,89 @@ const Cell & Map::cell(int x, int y) const
 	return map[x + y * width];
 }
 
+const Sprite & Map::sprite(int x, int y) const
+{
+	if(!cell(x, y).visible && !cell(x, y).seen) {
+		static Sprite CANNOT_SEE = ' ';
+		return CANNOT_SEE;
+	}
+	for(std::vector<Transport>::const_iterator transport = transports.begin(); transport != transports.end(); ++transport) {
+		if(transport->x == x && transport->y == y) {
+			return transport->sprite;
+		}
+	}
+	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			return door->sprite;
+		}
+	}
+	return get_cell_type(cell(x, y)).sprite;
+}
+
+const std::string & Map::name(int x, int y) const
+{
+	for(std::vector<Transport>::const_iterator transport = transports.begin(); transport != transports.end(); ++transport) {
+		if(transport->x == x && transport->y == y) {
+			return transport->name;
+		}
+	}
+	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			return door->name;
+		}
+	}
+	return get_cell_type(cell(x, y)).name;
+}
+
+bool Map::transparent(int x, int y) const
+{
+	for(std::vector<Transport>::const_iterator transport = transports.begin(); transport != transports.end(); ++transport) {
+		if(transport->x == x && transport->y == y) {
+			return true;
+		}
+	}
+	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			return door->opened;
+		}
+	}
+	return get_cell_type(cell(x, y)).transparent;
+}
+
+bool Map::passable(int x, int y) const
+{
+	for(std::vector<Transport>::const_iterator transport = transports.begin(); transport != transports.end(); ++transport) {
+		if(transport->x == x && transport->y == y) {
+			return true;
+		}
+	}
+	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			return door->opened;
+		}
+	}
+	return get_cell_type(cell(x, y)).passable;
+}
+
+void Map::open_at(int x, int y)
+{
+	for(std::vector<Door>::iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			if(!door->opened) {
+				door->open();
+			}
+		}
+	}
+}
+
+void Map::close_at(int x, int y)
+{
+	for(std::vector<Door>::iterator door = doors.begin(); door != doors.end(); ++door) {
+		if(door->x == x && door->y == y) {
+			if(door->opened) {
+				door->close();
+			}
+		}
+	}
+}
+

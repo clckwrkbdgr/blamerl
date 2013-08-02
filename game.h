@@ -38,19 +38,20 @@ public:
 	bool process_control(const Control & control);
 	int width() const;
 	int height() const;
+
 	const Sprite & sprite(int x, int y) const;
 	const std::string & name(int x, int y) const;
 	bool passable(int x, int y) const;
 	bool transparent(int x, int y) const;
+	void open_at(int x, int y);
+	void close_at(int x, int y);
+
 	bool show_cursor() const;
 
     bool has_auto_control() const;
     Control auto_control;
     std::list<Control> auto_control_list;
     Control get_auto_control() const;
-
-	void open_at(int x, int y);
-	void close_at(int x, int y);
 
     bool move_by(int shift_x, int shift_y);
     bool move_cursor_by(int shift_x, int shift_y);

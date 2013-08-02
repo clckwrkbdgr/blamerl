@@ -64,6 +64,13 @@ public:
 
     void fill(const Cell & filler);
 
+	const Sprite & sprite(int x, int y) const;
+	const std::string & name(int x, int y) const;
+	bool passable(int x, int y) const;
+	bool transparent(int x, int y) const;
+	void open_at(int x, int y);
+	void close_at(int x, int y);
+
 	Cell & cell(int x, int y);
 	const Cell & cell(int x, int y) const;
 };
