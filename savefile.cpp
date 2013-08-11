@@ -3,7 +3,7 @@
 #include "log.h"
 #include <fstream>
 
-enum { VERSION = 3 };
+enum { VERSION = 4 };
 
 bool save(const Game & game, const std::string & filename)
 {
@@ -16,6 +16,7 @@ bool save(const Game & game, const std::string & filename)
 	out << VERSION << '\n';
 
 	out << game.player.x << ' ' << game.player.y << '\n';
+	out << game.world_x << ' ' << game.world_y << '\n';
 
 	out << game.map.cell_types.size() << '\n';
 	for(std::vector<CellType>::const_iterator cell_type = game.map.cell_types.begin(); cell_type != game.map.cell_types.end(); ++cell_type) {
@@ -31,8 +32,8 @@ bool save(const Game & game, const std::string & filename)
 		out << '\n';
 	}
 
-	out << game.doors.size() << '\n';
-	for(std::vector<Door>::const_iterator door = game.doors.begin(); door != game.doors.end(); ++door) {
+	out << game.map.doors.size() << '\n';
+	for(std::vector<Door>::const_iterator door = game.map.doors.begin(); door != game.map.doors.end(); ++door) {
 		out << door->x << ' ' << door->y << ' ' << (door->opened ? 1 : 0) << ' ' << int(door->sprite) << ' ' << door->name << '\n';
 	}
 
@@ -57,6 +58,9 @@ bool load(Game & game, const std::string & filename)
 	}
 
 	in >> game.player.x >> game.player.y;
+    if(version >= 4) {
+        in >> game.world_x >> game.world_y;
+    }
 
 	game.map.cell_types.clear();
 	int cell_types_count = 0;
@@ -95,7 +99,7 @@ bool load(Game & game, const std::string & filename)
 		}
 	}
 
-	game.doors.clear();
+	game.map.doors.clear();
 	int door_count = 0;
 	in >> door_count;
 	while(door_count--) {
@@ -111,7 +115,7 @@ bool load(Game & game, const std::string & filename)
 		door.opened = opened == 1;
 		door.sprite = sprite;
 		door.name = name;
-		game.doors.push_back(door);
+		game.map.doors.push_back(door);
 	}
 
 	game.invalidate_fov();

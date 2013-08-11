@@ -4,29 +4,11 @@
 #include <cmath>
 #include <cstdlib>
 
+enum { MAP_WIDTH = 60, MAP_HEIGHT = 23 };
+
 Control::Control(int v, bool running)
     : value(v), run(running)
 {
-}
-
-// --------------------------------------------------------------------------
-
-Door::Door(int _x, int _y)
-	: x(_x), y(_y), opened(false), sprite('+')
-{
-	name = "a door";
-}
-
-void Door::open()
-{
-	opened = true;
-	sprite = '-';
-}
-
-void Door::close()
-{
-	opened = false;
-	sprite = '+';
 }
 
 //------------------------------------------------------------------------------
@@ -39,66 +21,48 @@ Player::Player(int player_x, int player_y)
 //------------------------------------------------------------------------------
 
 Game::Game()
-	: state(MOVING), do_save(true), examining(false)
+	: state(MOVING), do_save(true), examining(false), world_x(0), world_y(0)
 {
 }
 
 void Game::generate()
 {
     log("Generating new map...");
-	map = Map(80, 23);
 
-	Cell floor = map.register_type(CellType('.', true, true, "a floor"));
-	Cell wall = map.register_type(CellType('#', false, false, "a wall"));
-	Cell brick_wall = map.register_type(CellType('#', false, false, "a brick wall"));
-	Cell wooden_wall = map.register_type(CellType('#', false, false, "a wooden wall"));
-	Cell doorway = map.register_type(CellType('.', true, true, "a doorway"));
-	Cell glass = map.register_type(CellType('=', false, true, "a glass wall"));
+	map.generate(MAP_WIDTH, MAP_HEIGHT);
 
-    map.fill(floor);
-
-    for(int i = 0; i < 10; ++i) {
-        int x = rand() % map.width;
-        int y = rand() % map.height;
-        map.cell(x, y) = wall;
-    }
-    for(int i = 0; i < 5; ++i) {
-        int x1 = rand() % (map.width / 2);
-        int y = rand() % map.height;
-        int x2 = map.width / 2 + rand() % (map.width / 2);
-        for(int x = x1; x <= x2; ++x) {
-            map.cell(x, y) = brick_wall;
-        }
-		int glass_start = x1 + 1 + rand() % (x2 - x1 - 2);
-		int glass_width = rand() % (x2 - 1 - glass_start);
-        for(int x = glass_start; x <= glass_start + glass_width; ++x) {
-            map.cell(x, y) = glass;
-        }
-		int door_x = x1 + rand() % (x2 - x1);
-		map.cell(door_x, y) = doorway;
-		doors.push_back(Door(door_x, y));
-    }
-    for(int i = 0; i < 5; ++i) {
-        int x = rand() % (map.width / 2);
-        int y1 = rand() % map.height;
-        int y2 = map.height / 2 + rand() % (map.height / 2);
-        for(int y = y1; y <= y2; ++y) {
-            map.cell(x, y) = wooden_wall;
-        }
-		int door_y = y1 + rand() % (y2 - y1);
-		map.cell(x, door_y) = doorway;
-		doors.push_back(Door(x, door_y));
-    }
+    world_x = 0;
+    world_y = 0;
 
 	player.x = map.width / 2;
 	player.y = map.height / 2;
 	invalidate_fov();
+    log("FOV invalidated.");
 }
 
 bool Game::move_by(int shift_x, int shift_y)
 {
     if(!map.valid(player.x + shift_x, player.y + shift_y)) {
-        return false;
+        int old_player_x = player.x + shift_x;
+        int old_player_y = player.y + shift_y;
+
+        map.generate(MAP_WIDTH, MAP_HEIGHT);
+
+        while(old_player_x >= map.width)  { old_player_x = old_player_x - map.width;  ++world_x; }
+        while(old_player_x < 0)           { old_player_x = old_player_x + map.width;  --world_x; }
+        while(old_player_y >= map.height) { old_player_y = old_player_y - map.height; ++world_y; }
+        while(old_player_y < 0)           { old_player_y = old_player_y + map.height; --world_y; }
+        player.x = old_player_x;
+        player.y = old_player_y;
+        log("Player entered the scene at {0}, {1}.").arg(player.x).arg(player.y);
+        invalidate_fov();
+        log("FOV invalidated.");
+
+        state = MOVING;
+        message = "You have moved to a new place.";
+        auto_control = Control::UNKNOWN;
+        auto_control_list.clear();
+        return true;
     }
     if(!passable(player.x + shift_x, player.y + shift_y)) {
         return false;
@@ -228,13 +192,10 @@ bool Game::process_running(const Control & control)
             return true;
 	}
 
-    log("running: {0}, {1}").arg(shift_x).arg(shift_y);
-
 	if(shift_x != 0 || shift_y != 0) {
         if(move_by(shift_x, shift_y)) {
             if(!auto_control_list.empty()) {
                 auto_control_list.pop_front();
-                log("Popped; now size is {0}").arg(auto_control_list.size());
                 if(!has_auto_control()) {
                     state = MOVING;
                     auto_control = Control::UNKNOWN;
@@ -363,8 +324,6 @@ bool Game::process_closing(const Control & control)
 
 bool Game::process_control(const Control & control)
 {
-    log("Control is {0}, state is {1}").arg(char(control.value)).arg(state);
-    log("has auto control: {0}, control: {1}, list size: {2}").arg(has_auto_control()).arg(char(auto_control.value)).arg(auto_control_list.size());
 	switch(state) {
 		case MOVING: return process_moving(control);
 		case RUNNING: return process_running(control);
@@ -446,67 +405,31 @@ void Game::invalidate_fov()
 
 const Sprite & Game::sprite(int x, int y) const
 {
-	if(!map.cell(x, y).visible && !map.cell(x, y).seen) {
-		static Sprite CANNOT_SEE = ' ';
-		return CANNOT_SEE;
-	}
-	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
-		if(door->x == x && door->y == y) {
-			return door->sprite;
-		}
-	}
-	return map.get_cell_type(map.cell(x, y)).sprite;
+    return map.sprite(x, y);
 }
 
 const std::string & Game::name(int x, int y) const
 {
-	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
-		if(door->x == x && door->y == y) {
-			return door->name;
-		}
-	}
-	return map.get_cell_type(map.cell(x, y)).name;
+    return map.name(x, y);
 }
 
 bool Game::transparent(int x, int y) const
 {
-	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
-		if(door->x == x && door->y == y) {
-			return door->opened;
-		}
-	}
-	return map.get_cell_type(map.cell(x, y)).transparent;
+    return map.transparent(x, y);
 }
 
 bool Game::passable(int x, int y) const
 {
-	for(std::vector<Door>::const_iterator door = doors.begin(); door != doors.end(); ++door) {
-		if(door->x == x && door->y == y) {
-			return door->opened;
-		}
-	}
-	return map.get_cell_type(map.cell(x, y)).passable;
+    return map.passable(x, y);
 }
 
 void Game::open_at(int x, int y)
 {
-	for(std::vector<Door>::iterator door = doors.begin(); door != doors.end(); ++door) {
-		if(door->x == x && door->y == y) {
-			if(!door->opened) {
-				door->open();
-			}
-		}
-	}
+    map.open_at(x, y);
 }
 
 void Game::close_at(int x, int y)
 {
-	for(std::vector<Door>::iterator door = doors.begin(); door != doors.end(); ++door) {
-		if(door->x == x && door->y == y) {
-			if(door->opened) {
-				door->close();
-			}
-		}
-	}
+    map.close_at(x, y);
 }
 
