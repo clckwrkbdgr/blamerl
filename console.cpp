@@ -26,6 +26,7 @@ Console::~Console()
 
 void Console::draw_game(const Game & game)
 {
+	erase();
 	int width, height;
 	getmaxyx(stdscr, height, width);
     int message_pan_y = height - MESSAGE_HEIGHT;
